@@ -27,8 +27,14 @@ function App() {
 
     const ws = useRef(null);
     const intentionalDisconnect = useRef(false);
-    const BACKEND_URL = `http://${window.location.hostname}:8000`;
-    const WS_URL = `ws://${window.location.hostname}:8000`;
+    const isProd = import.meta.env.PROD;
+    const BACKEND_URL = isProd
+        ? "https://stop-ultra-backend.onrender.com"
+        : `http://${window.location.hostname}:8000`;
+
+    const WS_BASE_URL = isProd
+        ? "wss://stop-ultra-backend.onrender.com"
+        : `ws://${window.location.hostname}:8000`;
 
     // Reconnection on visibility change
     useEffect(() => {
@@ -99,7 +105,7 @@ function App() {
         if (ws.current) ws.current.close();
 
         intentionalDisconnect.current = false;
-        ws.current = new WebSocket(`${WS_URL}/ws/${code}/${clientId}`);
+        ws.current = new WebSocket(`${WS_BASE_URL}/ws/${code}/${clientId}`);
 
         ws.current.onopen = () => {
             console.log("WS Connected");
