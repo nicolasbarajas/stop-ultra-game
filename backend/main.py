@@ -301,6 +301,21 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                 if client_id == room_data.get("moderator_id") and room_data["state"] == "EVALUATING":
                     winner_id = payload.get("winner_id")
                     if winner_id and winner_id in players:
+                        # Find winner index in round_answers
+                        round_answers = room_data.get("round_answers", [])
+                        winner_index = -1
+                        for idx, ans in enumerate(round_answers):
+                            if ans["client_id"] == winner_id:
+                                winner_index = idx
+                                break
+
+                        # Penalize players who answered BEFORE the winner
+                        if winner_index > 0:
+                            for i in range(winner_index):
+                                p_id = round_answers[i]["client_id"]
+                                if p_id in players:
+                                    players[p_id]["score"] -= 1
+
                         players[winner_id]["score"] += 1
                         updates = {
                             "expire_at": get_expiration_time(),

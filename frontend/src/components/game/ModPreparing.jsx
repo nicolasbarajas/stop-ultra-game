@@ -8,9 +8,15 @@ const ModPreparing = ({ letter, category, isMod, onSpin, onStartRound, modName }
         // Delay the actual data fetch to show the animation
         setTimeout(() => {
             onSpin();
-            setIsSpinning(false);
         }, 2000);
     };
+
+    // Stop spinning animation once the letter is received
+    React.useEffect(() => {
+        if (letter) {
+            setIsSpinning(false);
+        }
+    }, [letter]);
 
     return (
         <div className="flex flex-col items-center justify-center h-full p-4 bg-[#1a1a2e] text-white">
