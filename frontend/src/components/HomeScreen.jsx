@@ -8,15 +8,36 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
 
     const [showHelp, setShowHelp] = useState(false);
 
-    const handleCreate = () => {
+    const [isCreating, setIsCreating] = useState(false);
+    const [showWakeUpMessage, setShowWakeUpMessage] = useState(false);
+
+    const handleCreate = async () => {
         console.log("HomeScreen: handleCreate clicked");
         if (!nickname.trim()) {
             console.log("HomeScreen: No nickname");
             alert("Por favor ingresa un Nickname");
             return;
         }
+
+        setIsCreating(true);
+        setShowWakeUpMessage(false);
+
+        // Timer to show message after 5 seconds
+        const timerId = setTimeout(() => {
+            setShowWakeUpMessage(true);
+        }, 5000);
+
         console.log("HomeScreen: Calling onCreateRoom with", nickname);
-        onCreateRoom(nickname);
+
+        try {
+            await onCreateRoom(nickname);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            clearTimeout(timerId);
+            setIsCreating(false);
+            setShowWakeUpMessage(false);
+        }
     };
 
     const goToJoin = () => {
@@ -61,7 +82,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
                 {view === 'MENU' && (
                     <>
                         <div className="flex flex-col gap-2">
-                            <label className="text-md font-bold text-gray-400 ml-1">Nombre del jugador</label>
+                            <label className="text-md font-bold text-gray-400 ml-1">Nombre del jugador:</label>
                             <input
                                 type="text"
                                 placeholder="Ej: Eugenia"
@@ -75,10 +96,28 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <button
                                 onClick={handleCreate}
-                                className="py-6 bg-purple-600 rounded-xl font-bold text-lg shadow-lg hover:bg-purple-500 hover:scale-[1.02] transition-all flex flex-col items-center gap-1"
+                                disabled={isCreating}
+                                className={`py-6 bg-purple-600 rounded-xl font-bold text-lg shadow-lg hover:bg-purple-500 hover:scale-[1.02] transition-all flex flex-col items-center justify-center gap-1 min-h-[120px] ${isCreating ? 'opacity-90 cursor-wait' : ''}`}
                             >
-                                <span>🏠</span>
-                                <span>Crear una <br /> nueva sala</span>
+                                {isCreating ? (
+                                    showWakeUpMessage ? (
+                                        <div className="flex flex-col items-center animate-fade-in px-4">
+                                            <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin mb-3"></div>
+                                            <span className="text-xs font-semibold leading-tight text-center text-white/90">
+                                                Iniciando servicios.<br />
+                                                Esto puede tomar<br />
+                                                un minuto.
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    )
+                                ) : (
+                                    <>
+                                        <span className="text-2xl">🏠</span>
+                                        <span className="leading-tight">Crear una <br /> nueva sala</span>
+                                    </>
+                                )}
                             </button>
                             <button
                                 onClick={goToJoin}

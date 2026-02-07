@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 import json
 import random
 import string
+import time
 from pydantic import BaseModel
 import asyncio
 import firebase_admin
@@ -96,6 +97,9 @@ class JoinRequest(BaseModel):
 
 @app.post("/create-room")
 async def create_room_endpoint():
+    # SIMULACIÓN DE COLD START (Borrar después)
+    time.sleep(15)
+    
     room_id = ''.join(random.choices(string.ascii_uppercase, k=4))
     
     # Ensure uniqueness (simple check, collision rare)
