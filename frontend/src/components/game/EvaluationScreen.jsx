@@ -25,17 +25,15 @@ const EvaluationScreen = ({
                         <div
                             key={idx}
                             onClick={() => isMod && setSelectedId(entry.client_id)}
-                            className={`p-3 rounded-lg border flex justify-between items-center transition-all ${selectedId === entry.client_id
+                            className={`p-3 mb-2 rounded-lg border flex justify-between items-center transition-all ${selectedId === entry.client_id
                                 ? 'bg-gradient-to-r from-green-900 to-slate-800 border-green-500 shadow-md'
                                 : 'bg-slate-800/60 border-slate-700'
                                 } ${isMod ? 'cursor-pointer active:scale-[0.99]' : ''}`}
                         >
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-xl bg-slate-600 flex items-center justify-center font-bold text-[10px]">
-                                    {entry.nickname.charAt(0)}
-                                </div>
+                            <div className="flex items-center gap-3">
+                                <span className="text-lg font-bold text-green-600 w-4 text-center text-bold">{idx + 1}</span>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] text-gray-400">{entry.nickname}</span>
+                                    <span className="text-lg text-gray-400">{entry.nickname}</span>
                                     <span className="text-lg font-bold text-white tracking-wide leading-tight">
                                         {entry.answer}
                                     </span>
