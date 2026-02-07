@@ -8,6 +8,7 @@ from pydantic import BaseModel
 import asyncio
 import firebase_admin
 from firebase_admin import credentials, firestore
+import datetime
 
 # --- Firebase Initialization ---
 # Ensure credentials file exists in root or backend/
@@ -66,6 +67,9 @@ manager = ConnectionManager()
 
 # --- Helpers ---
 
+def get_expiration_time():
+    return datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+
 def get_room_doc(room_id: str):
     return db.collection("rooms").document(room_id)
 
@@ -111,7 +115,8 @@ async def create_room_endpoint():
         "current_category": None,
         "round_answers": [],
         "time_limit": 60,
-        "created_at": firestore.SERVER_TIMESTAMP
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "expire_at": get_expiration_time()
     }
     doc_ref.set(room_data)
     
@@ -181,7 +186,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     "connected": True
                 }
                 
-                updates = {"players": players}
+                updates = {"players": players, "expire_at": get_expiration_time()}
                 if is_host:
                     updates["host_id"] = client_id
                 
@@ -203,6 +208,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             if new_host:
                                 players[new_host]["is_host"] = True
                         
+                        room_data["expire_at"] = get_expiration_time()
                         doc_ref.set(room_data) # Full rewrite simpler for dict deletion
                         should_broadcast_player_list = True
                     else:
@@ -220,12 +226,14 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             room_data["moderator_id"] = room_data["host_id"]
                             should_broadcast_game_state = True
                             
+                        room_data["expire_at"] = get_expiration_time()
                         doc_ref.set(room_data)
                         should_broadcast_player_list = True
                         
             elif action == "START_GAME":
                 if len(players) >= 3:
                      updates = {
+                         "expire_at": get_expiration_time(),
                          "state": "PREPARING",
                          "moderator_id": room_data.get("host_id"), # Start with host
                          "time_limit": payload.get("time_limit", 60),
@@ -240,6 +248,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             elif action == "SPIN":
                 if room_data.get("moderator_id") == client_id and room_data["state"] == "PREPARING":
                     updates = {
+                        "expire_at": get_expiration_time(),
                         "current_letter": random.choice(LETTERS),
                         "current_category": random.choice(CATEGORIES)
                     }
@@ -250,7 +259,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             elif action == "START_ROUND":
                 if room_data.get("moderator_id") == client_id and room_data["state"] == "PREPARING":
                      if room_data.get("current_letter"):
-                         updates = {"state": "PLAYING"}
+                         updates = {"state": "PLAYING", "expire_at": get_expiration_time()}
                          doc_ref.update(updates)
                          room_data.update(updates)
                          should_broadcast_game_state = True
@@ -267,7 +276,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          }
                          current_answers.append(new_answer)
                          
-                         updates = {"round_answers": current_answers}
+                         updates = {"round_answers": current_answers, "expire_at": get_expiration_time()}
                          
                          # Check if all answered
                          active_players_count = len([p for p in players if p != room_data.get("moderator_id")])
@@ -283,7 +292,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
 
             elif action == "FORCE_END_ROUND":
                 if room_data["state"] == "PLAYING":
-                    updates = {"state": "EVALUATING"}
+                    updates = {"state": "EVALUATING", "expire_at": get_expiration_time()}
                     doc_ref.update(updates)
                     room_data.update(updates)
                     should_broadcast_game_state = True
@@ -294,6 +303,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     if winner_id and winner_id in players:
                         players[winner_id]["score"] += 1
                         updates = {
+                            "expire_at": get_expiration_time(),
                             "players": players,
                             "moderator_id": winner_id,
                             "state": "SCORES"
@@ -307,6 +317,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                 # Start new round
                 if client_id == room_data.get("moderator_id") and room_data["state"] == "SCORES":
                     updates = {
+                        "expire_at": get_expiration_time(),
                         "state": "PREPARING",
                         "current_letter": None,
                         "current_category": None,
@@ -319,6 +330,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             elif action == "RESTART_ROUND":
                  if client_id == room_data.get("moderator_id") and room_data["state"] == "EVALUATING":
                     updates = {
+                        "expire_at": get_expiration_time(),
                         "state": "PREPARING",
                         "current_letter": None,
                         "current_category": None,
@@ -330,7 +342,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             
             elif action == "END_GAME":
                 if room_data.get("moderator_id") == client_id:
-                     updates = {"state": "FINAL_SCORES"}
+                     updates = {"state": "FINAL_SCORES", "expire_at": get_expiration_time()}
                      doc_ref.update(updates)
                      room_data.update(updates)
                      should_broadcast_game_state = True
@@ -340,6 +352,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                      # Reset scores
                      for pid in players: players[pid]["score"] = 0
                      updates = {
+                         "expire_at": get_expiration_time(),
                          "state": "LOBBY",
                          "players": players,
                          "round_answers": [],
