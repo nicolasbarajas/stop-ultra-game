@@ -98,7 +98,7 @@ class JoinRequest(BaseModel):
 @app.post("/create-room")
 async def create_room_endpoint():
     # SIMULACIÓN DE COLD START (Borrar después)
-    time.sleep(15)
+    # time.sleep(15)
     
     room_id = ''.join(random.choices(string.ascii_uppercase, k=4))
     
