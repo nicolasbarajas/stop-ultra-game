@@ -66,15 +66,17 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
                     ))}
 
                     {players.length === 0 && (
-                        <div className="text-center text-gray-500 italic mt-10">Esperando jugadores...</div>
+                        <div className="text-center text-gray-500 mt-10 mb-5">
+                            {isHost ? "Creando sala..." : "Cargando..."}
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* Footer Actions */}
             <div className="w-full max-w-md pb-4">
-                {!canStart && (
-                    <div className="text-center text-yellow-500/80 bg-yellow-900/10 py-5 rounded-lg border border-yellow-900/30 text-sm mb-3">
+                {!canStart && players.length > 0 && (
+                    <div className="text-center text-yellow-500/80 bg-yellow-900/10 py-5 rounded-lg border border-yellow-900/30 text-sm mb-6">
                         Esperando a {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
                     </div>
                 )}
@@ -100,22 +102,27 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
                                 </div>
                             </div>
                         </div>
-
-                        <button
-                            onClick={() => onStartGame(selectedTime)}
-                            disabled={!canStart}
-                            className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
-                                ? 'bg-green-500 hover:bg-green-400 hover:scale-[1.02] text-white cursor-pointer'
-                                : 'bg-slate-700 text-gray-500 cursor-not-allowed grayscale'
-                                }`}
-                        >
-                            {canStart ? "Iniciar partida 🚀" : "Esperando jugadores..."}
-                        </button>
+                        {
+                            canStart && (
+                                <button
+                                    onClick={() => onStartGame(selectedTime)}
+                                    disabled={!canStart}
+                                    className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
+                                        ? 'bg-green-500 hover:bg-green-400 hover:scale-[1.02] text-white cursor-pointer'
+                                        : 'bg-slate-700 text-gray-500 cursor-not-allowed grayscale'
+                                        }`}
+                                >
+                                    Iniciar partida 🚀
+                                </button>
+                            )
+                        }
                     </div>
                 ) : (
-                    <div className="w-full py-4 rounded-xl font-bold text-lg text-center bg-slate-800 text-gray-400 border border-slate-700">
-                        {canStart ? "Esperando inicio por parte del anfitrión..." : "Esperando jugadores..."}
-                    </div>
+                    canStart && (
+                        <div className="w-full py-4 rounded-xl font-bold text-lg text-center bg-slate-800 text-gray-400 border border-slate-700 animate-pulse">
+                            Esperando inicio por parte del anfitrión...
+                        </div>
+                    )
                 )}
             </div>
 
