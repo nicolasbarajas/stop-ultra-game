@@ -5,25 +5,17 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
     const canStart = players.length >= 3; // Rule: Must have >= 3 players
 
 
-    const [showTimeModal, setShowTimeModal] = React.useState(false);
+    const [selectedTime, setSelectedTime] = React.useState(30);
+
     const timeOptions = [
-        { label: "00:15", value: 15 },
-        { label: "00:30", value: 30 },
-        { label: "00:45", value: 45 },
-        { label: "01:00", value: 60 },
-        { label: "01:30", value: 90 },
-        { label: "01:45", value: 105 },
-        { label: "02:00", value: 120 },
+        { label: "15 Segundos", value: 15 },
+        { label: "30 Segundos", value: 30 },
+        { label: "45 Segundos", value: 45 },
+        { label: "60 Segundos", value: 60 },
+        { label: "90 Segundos", value: 90 },
+        { label: "105 Segundos", value: 105 },
+        { label: "120 Segundos", value: 120 },
     ];
-
-    const handleStartClick = () => {
-        setShowTimeModal(true);
-    };
-
-    const confirmStart = (time) => {
-        onStartGame(time);
-        setShowTimeModal(false);
-    };
 
     const [showHelp, setShowHelp] = React.useState(false);
 
@@ -88,16 +80,38 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
                 )}
 
                 {isHost ? (
-                    <button
-                        onClick={handleStartClick}
-                        disabled={!canStart}
-                        className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
-                            ? 'bg-green-500 hover:bg-green-400 hover:scale-[1.02] text-white cursor-pointer'
-                            : 'bg-slate-700 text-gray-500 cursor-not-allowed grayscale'
-                            }`}
-                    >
-                        {canStart ? "Iniciar partida 🚀" : "Esperando jugadores..."}
-                    </button>
+                    <div className="space-y-3">
+                        <div className="bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-2">
+                            <label className="text-gray-400 text-xs font-bold uppercase tracking-wider">Tiempo de ronda</label>
+                            <div className="relative">
+                                <select
+                                    value={selectedTime}
+                                    onChange={(e) => setSelectedTime(Number(e.target.value))}
+                                    className="w-full bg-slate-700 text-white font-bold p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500 appearance-none cursor-pointer border border-slate-600"
+                                >
+                                    {timeOptions.map(opt => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-white">
+                                    ▼
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => onStartGame(selectedTime)}
+                            disabled={!canStart}
+                            className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
+                                ? 'bg-green-500 hover:bg-green-400 hover:scale-[1.02] text-white cursor-pointer'
+                                : 'bg-slate-700 text-gray-500 cursor-not-allowed grayscale'
+                                }`}
+                        >
+                            {canStart ? "Iniciar partida 🚀" : "Esperando jugadores..."}
+                        </button>
+                    </div>
                 ) : (
                     <div className="w-full py-4 rounded-xl font-bold text-lg text-center bg-slate-800 text-gray-400 border border-slate-700">
                         {canStart ? "Esperando inicio por parte del anfitrión..." : "Esperando jugadores..."}
@@ -105,34 +119,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
                 )}
             </div>
 
-            {/* Timer Selection Modal */}
-            {showTimeModal && (
-                <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-                        <h3 className="text-2xl font-bold text-white mb-2 text-center">Configurar Tiempo</h3>
-                        <p className="text-gray-400 text-center mb-6 text-sm">¿Cuánto tiempo tendrán para escribir?</p>
-
-                        <div className="grid grid-cols-1 gap-2 max-h-[50vh] overflow-y-auto mb-4 custom-scrollbar">
-                            {timeOptions.map((opt) => (
-                                <button
-                                    key={opt.value}
-                                    onClick={() => confirmStart(opt.value)}
-                                    className="w-full p-4 rounded-xl bg-slate-700 hover:bg-indigo-600 text-white font-bold transition-all border border-slate-600 hover:border-indigo-400"
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={() => setShowTimeModal(false)}
-                            className="w-full py-3 text-red-400 font-bold hover:bg-slate-700 rounded-xl transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Timer Selection Modal Removed */}
 
 
             {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
