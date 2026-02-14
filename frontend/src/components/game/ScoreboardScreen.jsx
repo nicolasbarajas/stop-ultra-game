@@ -4,6 +4,9 @@ const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, o
     // Sort players by score
     const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
+    const hostPlayer = players.find(p => p.is_host);
+    const hostName = hostPlayer ? hostPlayer.nickname : "el anfitrión";
+
     return (
         <div className="flex flex-col h-full bg-[#1a1a2e] p-6 text-white items-center overflow-y-auto">
             <h2 className="text-3xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 tracking-wide text-center shrink-0">
@@ -45,13 +48,14 @@ const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, o
                         {isHost ? (
                             <button
                                 onClick={onBackToLobby}
-                                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-xl shadow-lg hover:scale-105 transition-transform"
+                                className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
                             >
                                 Volver a la sala 🏠
                             </button>
                         ) : (
-                            <div className="text-center text-gray-400 animate-pulse">
-                                Esperando acción del anfitrión...
+                            <div className="text-center text-gray-400 animate-pulse px-4 flex flex-col gap-1">
+                                <span>Esperando que el anfitrión <span className="text-rose-400 font-bold">{hostName}</span></span>
+                                <span>finalice totalmente la partida...</span>
                             </div>
                         )}
                     </>

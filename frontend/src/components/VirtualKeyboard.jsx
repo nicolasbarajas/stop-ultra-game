@@ -4,7 +4,7 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
     const rows = [
         ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
         ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-        ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+        ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
     ];
 
     // Ref to track last touch time to ignore potential ghost clicks
@@ -40,46 +40,45 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
 
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-gray-900 border-t-2 border-gray-700 flex flex-col z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] select-none pb-2">
+        <div className="w-full bg-gray-900 border-t border-gray-800 flex flex-col shadow-[0_-5px_20px_rgba(0,0,0,0.5)] select-none pb-safe -mt-4 relative z-50 overscroll-none touch-none">
 
-            {/* Row 1: Delete Actions (50% each) */}
-            <div className="flex w-full h-12 border-b border-gray-700">
+            {/* Row 1: Delete All (Full Width) */}
+            <div className="flex w-full h-14 relative z-20 mb-3 pl-3 pr-3 pt-3">
                 <button
                     onClick={handleClick(onDeleteAll)}
                     onTouchStart={handleTouch(onDeleteAll)}
-                    className="flex-1 bg-red-900/40 text-red-200 font-bold text-lg flex items-center justify-center active:bg-red-800 touch-manipulation border-r border-gray-700"
+                    className="w-full h-full bg-orange-600 hover:bg-orange-700 active:scale-95 text-white font-bold text-sm tracking-wide flex items-center justify-center touch-manipulation rounded-2xl shadow-lg shadow-red-900/20 transition-all"
                 >
-                    🗑️
-                </button>
-                <button
-                    onClick={handleClick(onBackspace)}
-                    onTouchStart={handleTouch(onBackspace)}
-                    className="flex-1 bg-slate-800 text-white font-bold text-lg flex items-center justify-center active:bg-slate-700 touch-manipulation"
-                >
-                    ⌫
+                    Borrar toda la palabra 🗑️
                 </button>
             </div>
 
             {/* Row 2: Input Display (Full Width) */}
-            <div className="w-full h-14 bg-black/40 flex items-center justify-center border-b border-gray-700 relative overflow-hidden">
-                <span className="text-xl font-bold tracking-widest text-white uppercase truncate px-4">
-                    {currentText}
+            <div className="w-full h-14 bg-black/40 flex items-center justify-center border-b border-gray-700 relative overflow-hidden px-4">
+                <span className="text-xl font-bold tracking-widest text-white uppercase truncate">
+                    {currentText.split('').map((char, index) => (
+                        <span key={index} className={char === ' ' ? 'text-gray-500 mx-0.5' : ''}>
+                            {char === ' ' ? '␣' : char}
+                        </span>
+                    ))}
                 </span>
-                <span className="w-1 h-8 bg-purple-500 animate-pulse absolute right-4"></span>
             </div>
 
 
             {/* Keys */}
-            <div className="flex flex-col p-2 gap-1 mt-1">
+            <div className="flex flex-col p-1 gap-1 mt-1">
                 {rows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex flex-1 gap-1 justify-center">
                         {row.map((key) => (
                             <button
                                 key={key}
-                                onClick={handleClick(() => onKeyPress(key))}
+                                onClick={handleClick(() => key === '⌫' ? onBackspace() : onKeyPress(key))}
                                 touch-action="none"
-                                onTouchStart={handleTouch(() => onKeyPress(key))}
-                                className="flex-1 max-w-[10%] h-12 rounded bg-slate-700 text-white font-bold text-xl active:bg-slate-500 shadow-sm transition-colors flex items-center justify-center active:scale-95 touch-manipulation"
+                                onTouchStart={handleTouch(() => key === '⌫' ? onBackspace() : onKeyPress(key))}
+                                className={`h-12 rounded font-bold text-xl shadow-sm transition-colors flex items-center justify-center active:scale-95 touch-manipulation ${key === '⌫'
+                                    ? 'flex-[1.5] bg-red-600/80 text-white active:bg-red-700 border border-red-500/30'
+                                    : 'flex-1 max-w-[10%] bg-slate-700 text-white active:bg-slate-500'
+                                    }`}
                             >
                                 {key}
                             </button>

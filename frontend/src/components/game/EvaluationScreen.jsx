@@ -128,7 +128,9 @@ const EvaluationScreen = ({
                                 El moderador <span className="text-yellow-400 font-bold">{modName}</span> está eligiendo al ganador...
                             </span>
                         ) : (
-                            "Esperando acción del moderador."
+                            <span>
+                                Esperando que el moderador <span className="text-yellow-400 font-bold">{modName}</span> reinicie la ronda o finalice la partida.
+                            </span>
                         )}
                     </div>
                 )}
