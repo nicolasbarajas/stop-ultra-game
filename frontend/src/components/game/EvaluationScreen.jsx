@@ -2,18 +2,36 @@ import React, { useState } from 'react';
 
 const EvaluationScreen = ({
     answers,
+    categoryDescription,
     players,
     isMod,
     isHost,
     onSelectWinner,
     onRestartRound,
     onEndGame,
-    modName
+    modName,
+    letter,
+    category
 }) => {
     const [selectedId, setSelectedId] = useState(null);
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a2e] p-4 text-white overflow-hidden">
+            {/* Header Info */}
+            <div className="bg-slate-900/50 p-4 mb-4 rounded-xl border border-white/5 flex items-center justify-between shrink-0">
+                <div>
+                    <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Categoría</div>
+                    <div className="text-xl font-bold text-white leading-tight">{category}</div>
+                    {categoryDescription && (
+                        <div className="text-xs text-gray-400/80 mt-0.5 leading-tight">{categoryDescription}</div>
+                    )}
+                </div>
+                <div className="text-right">
+                    <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Letra</div>
+                    <div className="text-3xl font-black text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">{letter}</div>
+                </div>
+            </div>
+
             <h2 className="text-center text-xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 shrink-0">
                 Respuestas
             </h2>
@@ -110,7 +128,7 @@ const EvaluationScreen = ({
                                 El moderador <span className="text-yellow-400 font-bold">{modName}</span> está eligiendo al ganador...
                             </span>
                         ) : (
-                            "Nadie ha respondido... Esperando decisión."
+                            "Esperando acción del moderador."
                         )}
                     </div>
                 )}

@@ -30,9 +30,10 @@ app.add_middleware(
 # --- Constants ---
 LETTERS = [c for c in string.ascii_uppercase if c not in ['K', 'W']]
 CATEGORIES = [
-    "Herramienta", "Animal", "Cuerpo humano", "Adjetivo", "Ciudad", "País",
-    "Profesión", "Deporte", "Alimento", "Cantante o grupo musical", 
-    "Película", "Serie de TV", "Persona famosa", "Marca"
+    ("Herramienta", "Instrumento-Utensilio"), ("Animal", "Clase-Orden-Familia-Especie"), ("Cuerpo Humano", "Partes-Fluidos-Enfermedades"),
+    ("Adjetivo", "Cualidad-Defecto"), ("Ciudad", "Municipio"), ("País", "Actual Existente"),
+    ("Profesión", "Ocupación-Oficio"), ("Deporte", "Disciplina Deportiva"), ("Alimento", "Comida-Bebida-Fruver"), ("Cantante", "Grupo Musical"),
+    ("Película", "En español o idioma original"), ("Serie de TV", "En español o idioma original"), ("Famoso", "Nombre o Alias"), ("Marca", "Empresa")
 ]
 
 # --- Connection Manager (WebSockets only) ---
@@ -94,6 +95,7 @@ def get_player_list(room_data: dict):
 class JoinRequest(BaseModel):
     room_id: str
     nickname: str
+    client_id: Optional[str] = None
 
 @app.post("/create-room")
 async def create_room_endpoint():
@@ -117,7 +119,9 @@ async def create_room_endpoint():
         "moderator_id": None,
         "current_letter": None,
         "current_category": None,
+        "current_category_description": None,
         "round_answers": [],
+        "round_start_time": None,
         "time_limit": 60,
         "created_at": firestore.SERVER_TIMESTAMP,
         "expire_at": get_expiration_time()
@@ -137,10 +141,20 @@ async def check_room(req: JoinRequest):
     
     data = doc.to_dict()
     if data.get("state") != "LOBBY":
-         # Allow rejoin if player exists? For now, stick to simple valid check
-        raise HTTPException(status_code=400, detail="Partida en progreso")
+         # Check if player is rejoining
+         players = data.get("players", {})
+         client_id = req.client_id
+         
+         if client_id and client_id in players:
+             return {"valid": True, "rejoin": True}
+             
+         raise HTTPException(status_code=400, detail="Partida en progreso")
         
     return {"valid": True}
+
+@app.get("/sync-time")
+async def sync_time_endpoint():
+    return {"server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()}
 
 # --- WebSocket ---
 
@@ -198,6 +212,27 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                 room_data.update(updates) # Local update for response
                 should_broadcast_player_list = True
 
+                # [FIX] Send immediate game state to rejoining player
+                if room_data["state"] != "LOBBY":
+                    # Send direct message to this socket, not broadcast
+                    try:
+                        await websocket.send_text(json.dumps({
+                            "type": "GAME_STATE_UPDATE",
+                            "payload": {
+                                "state": room_data.get("state"),
+                                "moderator_id": room_data.get("moderator_id"),
+                                "letter": room_data.get("current_letter"),
+                                "category": room_data.get("current_category"),
+                                "category_description": room_data.get("current_category_description"),
+                                "answers": room_data.get("round_answers", []),
+                                "time_limit": room_data.get("time_limit", 60),
+                                "round_start_time": room_data.get("round_start_time"),
+                                "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                            }
+                        }))
+                    except:
+                        pass
+
             elif action == "LEAVE_ROOM":
                 # Mark as disconnected or remove?
                 # For Lobby, maybe remove. For game, keep but mark disconnected.
@@ -243,6 +278,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          "time_limit": payload.get("time_limit", 60),
                          "current_letter": None,
                          "current_category": None,
+                         "current_category_description": None,
                          "round_answers": []
                      }
                      doc_ref.update(updates)
@@ -251,19 +287,90 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
 
             elif action == "SPIN":
                 if room_data.get("moderator_id") == client_id and room_data["state"] == "PREPARING":
+                    # 1. Update with result immediately so clients can start animation
+                    # Note: We do NOT set state to PLAYING yet, we keep it in PREPARING
+                    # but with a letter/category set.
+                    # Frontend will see letter/category and play animation.
+                    
+                    chosen_letter = random.choice(LETTERS)
+                    # Handle tuple (Name, Desc)
+                    chosen_cat_tuple = random.choice(CATEGORIES)
+                    if isinstance(chosen_cat_tuple, tuple):
+                        chosen_category = chosen_cat_tuple[0]
+                        chosen_category_desc = chosen_cat_tuple[1]
+                    else:
+                        chosen_category = chosen_cat_tuple
+                        chosen_category_desc = None
+                    
                     updates = {
                         "expire_at": get_expiration_time(),
-                        "current_letter": random.choice(LETTERS),
-                        "current_category": random.choice(CATEGORIES)
+                        "current_letter": chosen_letter,
+                        "current_category": chosen_category,
+                        "current_category_description": chosen_category_desc
                     }
                     doc_ref.update(updates)
                     room_data.update(updates)
-                    should_broadcast_game_state = True
+                    
+                    # Broadcast the "Spin Result" (still in PREPARING)
+                    await manager.broadcast(room_id, {
+                        "type": "GAME_STATE_UPDATE",
+                        "payload": {
+                            "state": room_data.get("state"),
+                            "moderator_id": room_data.get("moderator_id"),
+                            "letter": chosen_letter,
+                            "category": chosen_category,
+                            "category_description": chosen_category_desc,
+                            "answers": [],
+                            "time_limit": room_data.get("time_limit", 60),
+                            "round_start_time": None,
+                            "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                        }
+                    })
+
+                    # 2. Wait for animation (3.5 seconds)
+                    # Use asyncio.sleep to not block the event loop
+                    await asyncio.sleep(4)
+
+                    # 3. Automatically start the round
+                    # Refetch to ensure state hasn't changed (e.g. game ended)
+                    # Although simple check is enough for now
+                    doc = doc_ref.get()
+                    if doc.exists:
+                         current_rd = doc.to_dict()
+                         # Ensure we are still in PREPARING and same letter (not reset)
+                         if current_rd.get("state") == "PREPARING" and current_rd.get("current_letter") == chosen_letter:
+                             updates = {
+                                 "state": "PLAYING", 
+                                 "expire_at": get_expiration_time(),
+                                 "round_start_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                             }
+                             doc_ref.update(updates)
+                             room_data.update(updates)
+                             
+                             # Broadcast "PLAYING" state
+                             await manager.broadcast(room_id, {
+                                "type": "GAME_STATE_UPDATE",
+                                "payload": {
+                                    "state": "PLAYING",
+                                    "moderator_id": room_data.get("moderator_id"),
+                                    "letter": chosen_letter,
+                                    "category": chosen_category,
+                                    "category_description": chosen_category_desc,
+                                    "answers": [],
+                                    "time_limit": room_data.get("time_limit", 60),
+                                    "round_start_time": updates["round_start_time"],
+                                    "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                                }
+                            })
 
             elif action == "START_ROUND":
                 if room_data.get("moderator_id") == client_id and room_data["state"] == "PREPARING":
                      if room_data.get("current_letter"):
-                         updates = {"state": "PLAYING", "expire_at": get_expiration_time()}
+                         updates = {
+                             "state": "PLAYING", 
+                             "expire_at": get_expiration_time(),
+                             "round_start_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                         }
                          doc_ref.update(updates)
                          room_data.update(updates)
                          should_broadcast_game_state = True
@@ -340,6 +447,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         "state": "PREPARING",
                         "current_letter": None,
                         "current_category": None,
+                        "current_category_description": None,
                         "round_answers": []
                     }
                     doc_ref.update(updates)
@@ -353,6 +461,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         "state": "PREPARING",
                         "current_letter": None,
                         "current_category": None,
+                        "current_category_description": None,
                         "round_answers": []
                     }
                     doc_ref.update(updates)
@@ -376,7 +485,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          "players": players,
                          "round_answers": [],
                          "current_letter": None,
-                         "current_category": None
+                         "current_category": None,
+                         "current_category_description": None
                      }
                      doc_ref.update(updates)
                      room_data.update(updates)
@@ -398,16 +508,17 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         "moderator_id": room_data.get("moderator_id"),
                         "letter": room_data.get("current_letter"),
                         "category": room_data.get("current_category"),
+                        "category_description": room_data.get("current_category_description"),
                         "answers": room_data.get("round_answers", []),
-                        "time_limit": room_data.get("time_limit", 60)
+                        "time_limit": room_data.get("time_limit", 60),
+                        "round_start_time": room_data.get("round_start_time"),
+                        "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
                     }
                 })
 
     except WebSocketDisconnect:
         manager.disconnect(room_id, client_id)
         # Handle disconnect in Firestore?
-        # Ideally wait a bit before removing, but for now let's just mark connected=False
-        # Fetch fresh to avoid overwrites
         doc_ref = get_room_doc(room_id)
         doc = doc_ref.get()
         if doc.exists:
@@ -416,4 +527,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             if client_id in players:
                 players[client_id]["connected"] = False
                 doc_ref.update({"players": players})
+
+    except Exception as e:
+        print(f"CRITICAL WS ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        manager.disconnect(room_id, client_id)
 

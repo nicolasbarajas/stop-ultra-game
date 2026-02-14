@@ -11,8 +11,11 @@ const GameCoordinator = ({
     myClientId,
     players,
     isHost,
-    sendAction
+    sendAction,
+    onLeaveRoom,
+    serverOffset
 }) => {
+    const isProd = import.meta.env.PROD;
 
     // Derived Roles
     const isMod = gameData.moderator_id === myClientId;
@@ -54,10 +57,13 @@ const GameCoordinator = ({
                     isHost={isHost}
                     letter={gameData.letter}
                     category={gameData.category}
+                    categoryDescription={gameData.category_description}
                     answers={gameData.answers}
                     onSubmitWord={(word) => sendAction("SUBMIT_ANSWER", { answer: word })}
                     onForceEnd={() => sendAction("FORCE_END_ROUND")}
                     initialTime={gameData.time_limit || 60}
+                    startTime={gameData.round_start_time}
+                    serverOffset={serverOffset}
                 />
             </div>
         );
@@ -68,6 +74,9 @@ const GameCoordinator = ({
             <EvaluationScreen
                 answers={gameData.answers || []}
                 players={players}
+                letter={gameData.letter}
+                category={gameData.category} // Ensure category is passed if not already (it wasn't in previous snippet, let me check file!)
+                categoryDescription={gameData.category_description}
                 isMod={isMod}
                 isHost={isHost}
                 modName={modName}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import HelpModal from './HelpModal';
+import { getStoredNickname } from '../utils/auth';
 
 const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
     const [view, setView] = useState('MENU'); // 'MENU' | 'JOIN'
-    const [nickname, setNickname] = useState("");
+    const [nickname, setNickname] = useState(getStoredNickname() || "");
     const [joinCode, setJoinCode] = useState("");
 
     const [showHelp, setShowHelp] = useState(false);
