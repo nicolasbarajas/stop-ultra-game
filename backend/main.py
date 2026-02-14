@@ -196,6 +196,13 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                 # Check if first player -> Host
                 is_host = (len(players) == 0)
                 
+                # Check for duplicate nickname
+                original_nickname = nickname
+                count = 1
+                while any(p["nickname"].lower() == nickname.lower() for pid, p in players.items() if pid != client_id):
+                    nickname = f"{original_nickname}{count}"
+                    count += 1
+
                 # Update/Add player
                 players[client_id] = {
                     "nickname": nickname,

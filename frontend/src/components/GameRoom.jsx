@@ -245,6 +245,7 @@ function GameRoom() {
                 onStartGame={startGame}
                 isHost={isHost}
                 onLeaveRoom={leaveRoom}
+                myClientId={clientId}
             />
         );
     }

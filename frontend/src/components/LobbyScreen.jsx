@@ -1,7 +1,7 @@
 import React from 'react';
 import HelpModal from './HelpModal';
 
-const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
+const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClientId }) => {
     const canStart = players.length >= 3; // Rule: Must have >= 3 players
 
 
@@ -56,14 +56,28 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom }) => {
                 </h3>
 
                 <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-                    {players.map((p, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg animate-fade-in border border-slate-600/50">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-sm">
-                                {p.nickname.charAt(0).toUpperCase()}
+                    {players.map((p, idx) => {
+                        const isMe = p.id === myClientId;
+                        return (
+                            <div
+                                key={idx}
+                                className={`flex items-center gap-3 p-3 rounded-lg animate-fade-in border transition-all ${isMe
+                                    ? 'bg-indigo-600/40 border-indigo-400'
+                                    : 'bg-slate-700/50 border-slate-600/50'
+                                    }`}
+                            >
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm ${isMe
+                                    ? 'bg-white text-indigo-600'
+                                    : 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
+                                    }`}>
+                                    {p.nickname.charAt(0).toUpperCase()}
+                                </div>
+                                <span className={`font-medium text-lg truncate max-w-[200px] ${isMe ? 'text-white' : 'text-gray-200'}`}>
+                                    {p.nickname} {isMe && <span className="opacity-50 text-xs ml-1">(Tú)</span>}
+                                </span>
                             </div>
-                            <span className="font-medium text-lg truncate max-w-[200px]">{p.nickname}</span>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     {players.length === 0 && (
                         <div className="text-center text-gray-500 mt-10 mb-5">
