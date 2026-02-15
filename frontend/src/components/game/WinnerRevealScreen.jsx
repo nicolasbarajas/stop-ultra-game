@@ -71,7 +71,6 @@ const WinnerRevealScreen = ({
                     {isMeNextMod ? (
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <span className="text-3xl block">👑</span>
                                 <h3 className="text-xl font-bold text-yellow-400">¡Es tu turno de moderar!</h3>
                                 <p className="text-slate-300 text-sm">Prepárate para girar la ruleta.</p>
                             </div>
