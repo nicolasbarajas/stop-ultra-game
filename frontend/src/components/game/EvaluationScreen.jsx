@@ -51,16 +51,23 @@ const EvaluationScreen = ({
                             <div className="flex items-center gap-3">
                                 <span className="text-lg font-bold text-green-600 w-4 text-center text-bold">{idx + 1}</span>
                                 <div className="flex flex-col">
-                                    <span className="text-lg text-gray-400">{entry.nickname}</span>
+                                    <span className="text-xs text-gray-400">{entry.nickname}</span>
                                     <span className="text-lg font-bold text-white tracking-wide leading-tight">
                                         {entry.answer}
                                     </span>
                                 </div>
                             </div>
 
-                            {selectedId === entry.client_id && (
-                                <div className="text-xl animate-bounce">🏆</div>
-                            )}
+                            <div className="flex items-center gap-3">
+                                {entry.time_taken !== undefined && (
+                                    <span className="text-xl font-mono font-bold text-indigo-300 tracking-wider">
+                                        {entry.time_taken.toFixed(3)}s
+                                    </span>
+                                )}
+                                {selectedId === entry.client_id && (
+                                    <div className="text-xl animate-bounce">🏆</div>
+                                )}
+                            </div>
                         </div>
                     ))}
                     {answers.length === 0 && (

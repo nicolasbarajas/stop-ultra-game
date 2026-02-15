@@ -90,6 +90,25 @@ def get_player_list(room_data: dict):
         for pid, p in players.items()
     ]
 
+def get_game_state_payload(room_data: dict, force_reveal=False):
+    """
+    Constructs a consistent game state payload with all necessary fields.
+    """
+    return {
+        "state": room_data.get("state"),
+        "moderator_id": room_data.get("moderator_id"),
+        "letter": room_data.get("current_letter"),
+        "category": room_data.get("current_category"),
+        "category_description": room_data.get("current_category_description"),
+        "answers": room_data.get("round_answers", []),
+        "time_limit": room_data.get("time_limit", 60),
+        "round_start_time": room_data.get("round_start_time"),
+        # Include winning info if available, critical for re-joins/refreshes
+        "last_winning_word": room_data.get("last_winning_word"),
+        "last_winning_time": room_data.get("last_winning_time"),
+        "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+    }
+
 # --- HTTP Endpoints ---
 
 class JoinRequest(BaseModel):
@@ -225,17 +244,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     try:
                         await websocket.send_text(json.dumps({
                             "type": "GAME_STATE_UPDATE",
-                            "payload": {
-                                "state": room_data.get("state"),
-                                "moderator_id": room_data.get("moderator_id"),
-                                "letter": room_data.get("current_letter"),
-                                "category": room_data.get("current_category"),
-                                "category_description": room_data.get("current_category_description"),
-                                "answers": room_data.get("round_answers", []),
-                                "time_limit": room_data.get("time_limit", 60),
-                                "round_start_time": room_data.get("round_start_time"),
-                                "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                            }
+                            "payload": get_game_state_payload(room_data)
                         }))
                     except:
                         pass
@@ -318,20 +327,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     doc_ref.update(updates)
                     room_data.update(updates)
                     
-                    # Broadcast the "Spin Result" (still in PREPARING)
+                        # Broadcast the "Spin Result" (still in PREPARING)
                     await manager.broadcast(room_id, {
                         "type": "GAME_STATE_UPDATE",
-                        "payload": {
-                            "state": room_data.get("state"),
-                            "moderator_id": room_data.get("moderator_id"),
-                            "letter": chosen_letter,
-                            "category": chosen_category,
-                            "category_description": chosen_category_desc,
-                            "answers": [],
-                            "time_limit": room_data.get("time_limit", 60),
-                            "round_start_time": None,
-                            "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        }
+                        "payload": get_game_state_payload(room_data)
                     })
 
                     # 2. Wait for animation (3.5 seconds)
@@ -357,17 +356,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                              # Broadcast "PLAYING" state
                              await manager.broadcast(room_id, {
                                 "type": "GAME_STATE_UPDATE",
-                                "payload": {
-                                    "state": "PLAYING",
-                                    "moderator_id": room_data.get("moderator_id"),
-                                    "letter": chosen_letter,
-                                    "category": chosen_category,
-                                    "category_description": chosen_category_desc,
-                                    "answers": [],
-                                    "time_limit": room_data.get("time_limit", 60),
-                                    "round_start_time": updates["round_start_time"],
-                                    "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                                }
+                                "payload": get_game_state_payload(room_data)
                             })
 
             elif action == "START_ROUND":
@@ -390,9 +379,13 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          new_answer = {
                             "client_id": client_id,
                             "nickname": players[client_id]["nickname"],
-                            "answer": payload.get("answer", "").upper().strip()
+                            "answer": payload.get("answer", "").upper().strip(),
+                            "time_taken": payload.get("time_taken", 999.0) # Default high if missing
                          }
                          current_answers.append(new_answer)
+                         
+                         # SORT BY TIME_TAKEN
+                         current_answers.sort(key=lambda x: x.get("time_taken", 999.0))
                          
                          updates = {"round_answers": current_answers, "expire_at": get_expiration_time()}
                          
@@ -436,10 +429,12 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
 
                         players[winner_id]["score"] += 1
                         
-                        # Get winning word
+                        # Get winning word and time
                         winning_word = ""
+                        winning_time = 0.0
                         if winner_index >= 0:
                              winning_word = round_answers[winner_index]["answer"]
+                             winning_time = round_answers[winner_index].get("time_taken", 0.0)
 
                         # 1. SHOW WINNER REVEAL
                         updates = {
@@ -447,6 +442,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             "players": players,
                             "moderator_id": winner_id,
                             "last_winning_word": winning_word,
+                            "last_winning_time": winning_time,
                             "state": "WINNER_REVEAL"
                         }
                         doc_ref.update(updates)
@@ -456,18 +452,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         # Broadcast immediately
                         await manager.broadcast(room_id, {
                             "type": "GAME_STATE_UPDATE",
-                            "payload": {
-                                "state": "WINNER_REVEAL",
-                                "moderator_id": winner_id,
-                                "last_winning_word": winning_word,
-                                "letter": room_data.get("current_letter"),
-                                "category": room_data.get("current_category"),
-                                "category_description": room_data.get("current_category_description"),
-                                "answers": room_data.get("round_answers", []),
-                                "time_limit": room_data.get("time_limit", 60),
-                                "round_start_time": room_data.get("round_start_time"),
-                                "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                            }
+                            "payload": get_game_state_payload(room_data)
                         })
 
                         # 2. Wait 10 seconds (default)
@@ -488,18 +473,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                                  # Broadcast explicit state change
                                  await manager.broadcast(room_id, {
                                     "type": "GAME_STATE_UPDATE",
-                                    "payload": {
-                                        "state": "SCORES",
-                                        "moderator_id": curr.get("moderator_id"),
-                                        "last_winning_word": curr.get("last_winning_word"),
-                                        "letter": curr.get("current_letter"),
-                                        "category": curr.get("current_category"),
-                                        "category_description": curr.get("current_category_description"),
-                                        "answers": curr.get("round_answers", []),
-                                        "time_limit": curr.get("time_limit", 60),
-                                        "round_start_time": curr.get("round_start_time"),
-                                        "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                                    }
+                                    "payload": get_game_state_payload(curr)
                                 })
                         
                         # Prevent double broadcast from main loop logic since we handled it manually
@@ -579,17 +553,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             if should_broadcast_game_state:
                 await manager.broadcast(room_id, {
                     "type": "GAME_STATE_UPDATE",
-                    "payload": {
-                        "state": room_data.get("state"),
-                        "moderator_id": room_data.get("moderator_id"),
-                        "letter": room_data.get("current_letter"),
-                        "category": room_data.get("current_category"),
-                        "category_description": room_data.get("current_category_description"),
-                        "answers": room_data.get("round_answers", []),
-                        "time_limit": room_data.get("time_limit", 60),
-                        "round_start_time": room_data.get("round_start_time"),
-                        "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                    }
+                    "payload": get_game_state_payload(room_data)
                 })
 
     except WebSocketDisconnect:

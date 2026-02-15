@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const WinnerRevealScreen = ({
     winnerName,
     winningWord,
+    winningTime,
     isMeNextMod,
     nextModName,
     onSkip
@@ -58,6 +59,11 @@ const WinnerRevealScreen = ({
                             <span className="text-2xl md:text-3xl font-bold text-white tracking-wide">
                                 "{winningWord}"
                             </span>
+                            {winningTime > 0 && (
+                                <span className="block text-indigo-300 text-sm font-mono mt-2">
+                                    ⏱ {winningTime.toFixed(3)}s
+                                </span>
+                            )}
                         </div>
                     </div>
                 </motion.div>

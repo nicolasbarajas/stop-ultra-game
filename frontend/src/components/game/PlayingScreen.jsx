@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import VirtualKeyboard from '../VirtualKeyboard';
 
 const PlayingScreen = ({
@@ -56,6 +56,15 @@ const PlayingScreen = ({
         }
     }, [timeLeft, isMod, onForceEnd]);
 
+    const roundStartTimeRef = useRef(null);
+
+    // Track when letter/category becomes available to start the local timer
+    useEffect(() => {
+        if (letter && category && !submitted) {
+            roundStartTimeRef.current = performance.now();
+        }
+    }, [letter, category, submitted]);
+
     // Keyboard handlers
     const handleKeyPress = (key) => {
         if (submitted) return;
@@ -74,7 +83,12 @@ const PlayingScreen = ({
 
     const handleSend = () => {
         if (word.length > 0 && !submitted) {
-            onSubmitWord(word);
+            const endTime = performance.now();
+            const timeTaken = roundStartTimeRef.current
+                ? (endTime - roundStartTimeRef.current) / 1000
+                : 0;
+
+            onSubmitWord(word, timeTaken);
             setSubmitted(true);
         }
     };
@@ -145,7 +159,14 @@ const PlayingScreen = ({
                             <div className="w-full max-w-sm flex-1 overflow-y-auto space-y-2 mb-4 custom-scrollbar">
                                 {safeAnswers.map((ans, idx) => (
                                     <div key={idx} className="bg-slate-800/80 p-3 rounded-lg flex justify-between items-center border border-slate-700 animate-fade-in-up">
-                                        <span className="text-xs text-gray-400 font-bold">{ans.nickname}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-gray-400 font-bold">{ans.nickname}</span>
+                                            {ans.time_taken !== undefined && (
+                                                <span className="text-[10px] text-indigo-400 font-mono">
+                                                    {ans.time_taken.toFixed(3)}s
+                                                </span>
+                                            )}
+                                        </div>
                                         <span className="bg-black/30 px-2 py-1 rounded text-green-400 font-mono text-sm">ENVIADO</span>
                                     </div>
                                 ))}

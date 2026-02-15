@@ -60,7 +60,7 @@ const GameCoordinator = ({
                     category={gameData.category}
                     categoryDescription={gameData.category_description}
                     answers={gameData.answers}
-                    onSubmitWord={(word) => sendAction("SUBMIT_ANSWER", { answer: word })}
+                    onSubmitWord={(word, timeTaken) => sendAction("SUBMIT_ANSWER", { answer: word, time_taken: timeTaken })}
                     onForceEnd={() => sendAction("FORCE_END_ROUND")}
                     initialTime={gameData.time_limit || 60}
                     startTime={gameData.round_start_time}
@@ -93,6 +93,7 @@ const GameCoordinator = ({
             <WinnerRevealScreen
                 winnerName={modName}
                 winningWord={gameData.last_winning_word || "..."}
+                winningTime={gameData.last_winning_time || 0}
                 isMeNextMod={isMod}
                 nextModName={modName}
                 onSkip={() => sendAction("SKIP_WINNER_REVEAL")}
