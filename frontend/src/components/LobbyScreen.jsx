@@ -91,7 +91,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
             <div className="w-full max-w-md pb-4">
                 {!canStart && players.length > 0 && (
                     <div className="text-center text-yellow-500/80 bg-yellow-900/10 py-5 rounded-lg border border-yellow-900/30 text-sm mb-6">
-                        Esperando a {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
+                        Esperando a mínimo {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
                     </div>
                 )}
 

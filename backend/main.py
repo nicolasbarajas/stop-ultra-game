@@ -435,16 +435,85 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                                     players[p_id]["score"] -= 1
 
                         players[winner_id]["score"] += 1
+                        
+                        # Get winning word
+                        winning_word = ""
+                        if winner_index >= 0:
+                             winning_word = round_answers[winner_index]["answer"]
+
+                        # 1. SHOW WINNER REVEAL
                         updates = {
                             "expire_at": get_expiration_time(),
                             "players": players,
                             "moderator_id": winner_id,
-                            "state": "SCORES"
+                            "last_winning_word": winning_word,
+                            "state": "WINNER_REVEAL"
                         }
                         doc_ref.update(updates)
                         room_data.update(updates)
                         should_broadcast_player_list = True
-                        should_broadcast_game_state = True
+                        
+                        # Broadcast immediately
+                        await manager.broadcast(room_id, {
+                            "type": "GAME_STATE_UPDATE",
+                            "payload": {
+                                "state": "WINNER_REVEAL",
+                                "moderator_id": winner_id,
+                                "last_winning_word": winning_word,
+                                "letter": room_data.get("current_letter"),
+                                "category": room_data.get("current_category"),
+                                "category_description": room_data.get("current_category_description"),
+                                "answers": room_data.get("round_answers", []),
+                                "time_limit": room_data.get("time_limit", 60),
+                                "round_start_time": room_data.get("round_start_time"),
+                                "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                            }
+                        })
+
+                        # 2. Wait 10 seconds (default)
+                        await asyncio.sleep(10)
+
+                        # 3. Transition to SCORES
+                        # Re-fetch to ensure state is still relevant (e.g. game not ended, or skipped)
+                        doc = doc_ref.get()
+                        if doc.exists:
+                             curr = doc.to_dict()
+                             if curr.get("state") == "WINNER_REVEAL":
+                                 updates = {
+                                     "state": "SCORES",
+                                     "expire_at": get_expiration_time()
+                                 }
+                                 doc_ref.update(updates)
+                                 room_data.update(updates)
+                                 # Broadcast explicit state change
+                                 await manager.broadcast(room_id, {
+                                    "type": "GAME_STATE_UPDATE",
+                                    "payload": {
+                                        "state": "SCORES",
+                                        "moderator_id": curr.get("moderator_id"),
+                                        "last_winning_word": curr.get("last_winning_word"),
+                                        "letter": curr.get("current_letter"),
+                                        "category": curr.get("current_category"),
+                                        "category_description": curr.get("current_category_description"),
+                                        "answers": curr.get("round_answers", []),
+                                        "time_limit": curr.get("time_limit", 60),
+                                        "round_start_time": curr.get("round_start_time"),
+                                        "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                                    }
+                                })
+                        
+                        # Prevent double broadcast from main loop logic since we handled it manually
+                        should_broadcast_game_state = False
+
+            elif action == "SKIP_WINNER_REVEAL":
+                 if client_id == room_data.get("moderator_id") and room_data["state"] == "WINNER_REVEAL":
+                     updates = {
+                         "state": "SCORES",
+                         "expire_at": get_expiration_time()
+                     }
+                     doc_ref.update(updates)
+                     room_data.update(updates)
+                     should_broadcast_game_state = True
 
             elif action == "CONTINUE_GAME":
                 # Start new round

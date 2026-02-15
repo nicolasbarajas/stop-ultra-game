@@ -3,6 +3,7 @@ import ModPreparing from './game/ModPreparing';
 import PlayingScreen from './game/PlayingScreen';
 import EvaluationScreen from './game/EvaluationScreen';
 import ScoreboardScreen from './game/ScoreboardScreen';
+import WinnerRevealScreen from './game/WinnerRevealScreen';
 
 // gameState: PREPARING | PLAYING | EVALUATING | SCORES
 const GameCoordinator = ({
@@ -83,6 +84,18 @@ const GameCoordinator = ({
                 onSelectWinner={(winnerId) => sendAction("SELECT_WINNER", { winner_id: winnerId })}
                 onRestartRound={() => sendAction("RESTART_ROUND")} // Using backend fallback
                 onEndGame={() => sendAction("END_GAME")}
+            />
+        );
+    }
+
+    if (gameState === 'WINNER_REVEAL') {
+        return (
+            <WinnerRevealScreen
+                winnerName={modName}
+                winningWord={gameData.last_winning_word || "..."}
+                isMeNextMod={isMod}
+                nextModName={modName}
+                onSkip={() => sendAction("SKIP_WINNER_REVEAL")}
             />
         );
     }
