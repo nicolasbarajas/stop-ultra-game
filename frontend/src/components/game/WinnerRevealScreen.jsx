@@ -29,6 +29,7 @@ const WinnerRevealScreen = ({
 
             <AnimatePresence>
                 <motion.div
+                    key="winner-info"
                     initial={{ opacity: 0, scale: 0.8, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 1.1 }}
@@ -69,6 +70,7 @@ const WinnerRevealScreen = ({
                 </motion.div>
 
                 <motion.div
+                    key="next-mod-info"
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.5, duration: 0.8 }}
