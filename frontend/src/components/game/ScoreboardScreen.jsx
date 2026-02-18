@@ -88,8 +88,9 @@ const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, o
                                 </button>
                             </div>
                         ) : (
-                            <div className="text-center text-gray-400 animate-pulse mt-4 px-4">
-                                Esperando a que <span className="text-yellow-400 font-bold">{modName}</span> inicie la siguiente ronda...
+                            <div className="text-center text-gray-400 animate-pulse px-4">
+                                Esperando a que <span className="text-yellow-400 font-bold">{modName}</span> inicie <br />
+                                la siguiente ronda...
                             </div>
                         )}
                     </>

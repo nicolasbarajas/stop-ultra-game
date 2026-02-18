@@ -20,17 +20,23 @@ const EvaluationScreen = ({
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a2e] p-4 text-white overflow-hidden">
-            <div className="bg-slate-900/50 p-4 mb-4 rounded-xl border border-white/5 flex items-center justify-between shrink-0 relative">
-                <div>
-                    <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Categoría</div>
-                    <div className="text-xl font-bold text-white leading-tight">{category}</div>
-                    {categoryDescription && (
-                        <div className="text-xs text-gray-400/80 mt-0.5 leading-tight">{categoryDescription}</div>
-                    )}
-                </div>
-                <div className="text-right">
-                    <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Letra</div>
-                    <div className="text-3xl font-black text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">{letter}</div>
+            <div className="bg-slate-900/50 p-4 mb-4 rounded-xl border border-white/5 relative shrink-0 shadow-lg">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-50 rounded-t-xl" />
+                <div className="flex items-center gap-4">
+                    {/* Letter Box */}
+                    <div className="flex flex-col items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-lg shadow-lg border border-indigo-400/30 shrink-0">
+                        <span className="text-[12px] text-indigo-200 font-bold tracking-wider">Letra</span>
+                        <span className="text-4xl font-black text-white drop-shadow-md leading-none pb-1">{letter}</span>
+                    </div>
+
+                    {/* Category Info */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <span className="text-sm text-indigo-300 font-bold tracking-wider mb-0.5">Categoría Actual</span>
+                        <h2 className="text-2xl font-bold text-white leading-tight truncate drop-shadow-sm">{category}</h2>
+                        {categoryDescription && (
+                            <p className="text-xs text-slate-400 mt-1 truncate">{categoryDescription}</p>
+                        )}
+                    </div>
                 </div>
             </div>
 
