@@ -68,8 +68,7 @@ const WinnerRevealScreen = ({
                     {isMeNextMod ? (
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-yellow-400">¡Es tu turno de moderar!</h3>
-                                <p className="text-slate-300 text-sm">Oprime continuar para ver los puntajes.</p>
+                                <h3 className="text-xl text-white">¡Es tu turno de moderar!</h3>
                             </div>
 
                             <motion.button
@@ -83,13 +82,10 @@ const WinnerRevealScreen = ({
                         </div>
                     ) : (
                         <div className="space-y-2">
-                            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center mx-auto text-lg border border-slate-600">
-                                👤
-                            </div>
                             <h3 className="text-lg font-medium text-slate-200">
-                                El jugador <span className="text-yellow-400 font-bold">{nextModName}</span> será el siguiente moderador
+                                <span className="text-yellow-400 font-bold">{nextModName}</span> será el siguiente moderador
                             </h3>
-                            <p className="text-xs text-gray-500">Esperando que continúe...</p>
+                            <p className="text-xs text-gray-500">Esperando a que continúe...</p>
                         </div>
                     )}
                 </motion.div>
