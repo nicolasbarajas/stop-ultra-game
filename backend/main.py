@@ -142,6 +142,7 @@ async def create_room_endpoint():
         "current_category_description": None,
         "round_answers": [],
         "winners_history": [],
+        "inactive_players": {},
         "round_start_time": None,
         "time_limit": 60,
         "created_at": firestore.SERVER_TIMESTAMP,
@@ -225,15 +226,23 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     nickname = f"{original_nickname}{count}"
                     count += 1
 
+                # RECOVER SCORE FROM INACTIVE (KICKED) PLAYERS
+                inactive_players = room_data.get("inactive_players", {})
+                recovered_score = 0
+                if client_id in inactive_players:
+                    recovered_score = inactive_players[client_id]["score"]
+                    # Remove from inactive since they are back
+                    del inactive_players[client_id]
+
                 # Update/Add player
                 players[client_id] = {
                     "nickname": nickname,
-                    "score": players.get(client_id, {}).get("score", 0), # Keep score if rejoining
+                    "score": players.get(client_id, {}).get("score", recovered_score), 
                     "is_host": is_host or players.get(client_id, {}).get("is_host", False),
                     "connected": True
                 }
                 
-                updates = {"players": players, "expire_at": get_expiration_time()}
+                updates = {"players": players, "inactive_players": inactive_players, "expire_at": get_expiration_time()}
                 if is_host:
                     updates["host_id"] = client_id
                 
@@ -535,6 +544,44 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                      should_broadcast_player_list = True
                      should_broadcast_game_state = True
 
+            elif action == "KICK_PLAYER":
+                target_id = payload.get("target_id")
+                if (client_id == room_data.get("moderator_id") or client_id == room_data.get("host_id")) and target_id in players:
+                    if target_id == client_id:
+                        continue # Cannot kick self
+
+                    # Move to inactive to preserve score
+                    inactive_players = room_data.get("inactive_players", {})
+                    inactive_players[target_id] = {
+                        "nickname": players[target_id]["nickname"],
+                        "score": players[target_id]["score"]
+                    }
+                    
+                    # Remove from active players
+                    del players[target_id]
+                    
+                    # Reassign roles if necessary
+                    if room_data.get("host_id") == target_id:
+                         new_host = next(iter(players)) if players else None
+                         room_data["host_id"] = new_host
+                         if new_host:
+                             players[new_host]["is_host"] = True
+
+                    if room_data.get("moderator_id") == target_id:
+                         room_data["moderator_id"] = room_data["host_id"]
+                         should_broadcast_game_state = True
+
+                    updates = {
+                        "players": players, 
+                        "inactive_players": inactive_players,
+                        "host_id": room_data.get("host_id"),
+                        "moderator_id": room_data.get("moderator_id"),
+                        "expire_at": get_expiration_time()
+                    }
+                    doc_ref.update(updates)
+                    room_data.update(updates)
+                    should_broadcast_player_list = True
+
             # --- Broadcast Updates ---
             if should_broadcast_player_list:
                 await manager.broadcast(room_id, {
@@ -550,7 +597,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
 
     except WebSocketDisconnect:
         manager.disconnect(room_id, client_id)
-        # Handle disconnect in Firestore?
+        # Optional: Auto-remove from players if desired, but we keep them for reconnection logic
+        # per previous requirements.
         doc_ref = get_room_doc(room_id)
         doc = doc_ref.get()
         if doc.exists:
@@ -559,7 +607,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             if client_id in players:
                 players[client_id]["connected"] = False
                 doc_ref.update({"players": players})
-
     except Exception as e:
         print(f"CRITICAL WS ERROR: {e}")
         import traceback

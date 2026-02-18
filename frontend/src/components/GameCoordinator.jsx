@@ -113,6 +113,8 @@ const GameCoordinator = ({
                 onContinue={() => sendAction("CONTINUE_GAME")}
                 onBackToLobby={() => sendAction("RETURN_TO_LOBBY")}
                 onEndGame={() => sendAction("END_GAME")}
+                onKickPlayer={(targetId) => sendAction("KICK_PLAYER", { target_id: targetId })}
+                myClientId={myClientId}
             />
         );
     }
