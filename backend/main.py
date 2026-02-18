@@ -106,6 +106,7 @@ def get_game_state_payload(room_data: dict, force_reveal=False):
         # Include winning info if available, critical for re-joins/refreshes
         "last_winning_word": room_data.get("last_winning_word"),
         "last_winning_time": room_data.get("last_winning_time"),
+        "winners_history": room_data.get("winners_history", []),
         "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
 
@@ -140,6 +141,7 @@ async def create_room_endpoint():
         "current_category": None,
         "current_category_description": None,
         "round_answers": [],
+        "winners_history": [],
         "round_start_time": None,
         "time_limit": 60,
         "created_at": firestore.SERVER_TIMESTAMP,
@@ -437,12 +439,21 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                              winning_time = round_answers[winner_index].get("time_taken", 0.0)
 
                         # 1. SHOW WINNER REVEAL
+                        winners_history = room_data.get("winners_history", [])
+                        if winning_word:
+                             winners_history.append({
+                                 "category": room_data.get("current_category", "Desconocida"),
+                                 "word": winning_word,
+                                 "winner": players[winner_id]["nickname"]
+                             })
+
                         updates = {
                             "expire_at": get_expiration_time(),
                             "players": players,
                             "moderator_id": winner_id,
                             "last_winning_word": winning_word,
                             "last_winning_time": winning_time,
+                            "winners_history": winners_history,
                             "state": "WINNER_REVEAL"
                         }
                         doc_ref.update(updates)

@@ -84,6 +84,7 @@ const GameCoordinator = ({
                 onSelectWinner={(winnerId) => sendAction("SELECT_WINNER", { winner_id: winnerId })}
                 onRestartRound={() => sendAction("RESTART_ROUND")} // Using backend fallback
                 onEndGame={() => sendAction("END_GAME")}
+                winnersHistory={gameData.winners_history || []}
             />
         );
     }
