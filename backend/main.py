@@ -162,14 +162,15 @@ async def check_room(req: JoinRequest):
     
     data = doc.to_dict()
     if data.get("state") != "LOBBY":
-         # Check if player is rejoining
+         # Return rejoin status if applicable, otherwise allow join (late join)
          players = data.get("players", {})
          client_id = req.client_id
          
          if client_id and client_id in players:
              return {"valid": True, "rejoin": True}
              
-         raise HTTPException(status_code=400, detail="Partida en progreso")
+         # Allow late join
+         return {"valid": True, "in_progress": True}
         
     return {"valid": True}
 

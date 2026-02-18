@@ -56,15 +56,6 @@ const PlayingScreen = ({
         }
     }, [timeLeft, isMod, onForceEnd]);
 
-    const roundStartTimeRef = useRef(null);
-
-    // Track when letter/category becomes available to start the local timer
-    useEffect(() => {
-        if (letter && category && !submitted) {
-            roundStartTimeRef.current = performance.now();
-        }
-    }, [letter, category, submitted]);
-
     // Keyboard handlers
     const handleKeyPress = (key) => {
         if (submitted) return;
@@ -83,10 +74,13 @@ const PlayingScreen = ({
 
     const handleSend = () => {
         if (word.length > 0 && !submitted) {
-            const endTime = performance.now();
-            const timeTaken = roundStartTimeRef.current
-                ? (endTime - roundStartTimeRef.current) / 1000
-                : 0;
+            let timeTaken = 0;
+            if (startTime) {
+                const nowSynced = Date.now() + serverOffset;
+                const startMs = new Date(startTime).getTime();
+                const elapsed = (nowSynced - startMs) / 1000;
+                timeTaken = Math.max(0, elapsed);
+            }
 
             onSubmitWord(word, timeTaken);
             setSubmitted(true);
