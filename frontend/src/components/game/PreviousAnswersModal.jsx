@@ -30,7 +30,7 @@ const PreviousAnswersModal = ({ isOpen, onClose, history, currentCategory }) => 
 
                     {categoryHistory.length === 0 ? (
                         <div className="text-center py-8 text-gray-500 italic">
-                            No hay respuestas ganadoras previas en esta categoría.
+                            No hay respuestas ganadoras<br />previas en esta categoría.
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2">

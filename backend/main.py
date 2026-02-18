@@ -297,7 +297,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          "current_letter": None,
                          "current_category": None,
                          "current_category_description": None,
-                         "round_answers": []
+                         "round_answers": [],
+                         "winners_history": []
                      }
                      doc_ref.update(updates)
                      room_data.update(updates)
@@ -466,29 +467,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             "payload": get_game_state_payload(room_data)
                         })
 
-                        # 2. Wait 10 seconds (default)
-                        await asyncio.sleep(10)
-
-                        # 3. Transition to SCORES
-                        # Re-fetch to ensure state is still relevant (e.g. game not ended, or skipped)
-                        doc = doc_ref.get()
-                        if doc.exists:
-                             curr = doc.to_dict()
-                             if curr.get("state") == "WINNER_REVEAL":
-                                 updates = {
-                                     "state": "SCORES",
-                                     "expire_at": get_expiration_time()
-                                 }
-                                 doc_ref.update(updates)
-                                 room_data.update(updates)
-                                 # Broadcast explicit state change
-                                 await manager.broadcast(room_id, {
-                                    "type": "GAME_STATE_UPDATE",
-                                    "payload": get_game_state_payload(curr)
-                                })
-                        
-                        # Prevent double broadcast from main loop logic since we handled it manually
-                        should_broadcast_game_state = False
+                        # REMOVED AUTOMATIC TRANSITION TO SCORES
+                        # Moderator must click "Continue/Skip" to proceed.
 
             elif action == "SKIP_WINNER_REVEAL":
                  if client_id == room_data.get("moderator_id") and room_data["state"] == "WINNER_REVEAL":

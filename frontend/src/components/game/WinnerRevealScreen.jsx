@@ -9,17 +9,6 @@ const WinnerRevealScreen = ({
     nextModName,
     onSkip
 }) => {
-    const [canSkip, setCanSkip] = useState(false);
-
-    useEffect(() => {
-        if (isMeNextMod) {
-            const timer = setTimeout(() => {
-                setCanSkip(true);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [isMeNextMod]);
-
     return (
         <div className="flex flex-col items-center justify-center h-full w-full p-6 text-center space-y-8 relative overflow-hidden">
             {/* Background Effects */}
@@ -73,26 +62,24 @@ const WinnerRevealScreen = ({
                     key="next-mod-info"
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.5, duration: 0.8 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
                     className="z-10 mt-12 bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl max-w-sm w-full shadow-2xl"
                 >
                     {isMeNextMod ? (
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <h3 className="text-xl font-bold text-yellow-400">¡Es tu turno de moderar!</h3>
-                                <p className="text-slate-300 text-sm">Prepárate para girar la ruleta.</p>
+                                <p className="text-slate-300 text-sm">Oprime continuar para ver los puntajes.</p>
                             </div>
 
-                            {canSkip && (
-                                <motion.button
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    onClick={onSkip}
-                                    className="px-6 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg border border-yellow-500/50 transition-all font-medium text-sm"
-                                >
-                                    Continuar ahora ➜
-                                </motion.button>
-                            )}
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                onClick={onSkip}
+                                className="px-6 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg border border-yellow-500/50 transition-all font-medium text-sm w-full"
+                            >
+                                Continuar ➜
+                            </motion.button>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -102,18 +89,11 @@ const WinnerRevealScreen = ({
                             <h3 className="text-lg font-medium text-slate-200">
                                 El jugador <span className="text-yellow-400 font-bold">{nextModName}</span> será el siguiente moderador
                             </h3>
+                            <p className="text-xs text-gray-500">Esperando que continúe...</p>
                         </div>
                     )}
                 </motion.div>
             </AnimatePresence>
-
-            {/* Countdown or Progress bar (Optional visual cue) */}
-            <motion.div
-                className="absolute bottom-0 left-0 h-1 bg-yellow-500/50"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 10, ease: "linear" }}
-            />
         </div>
     );
 };

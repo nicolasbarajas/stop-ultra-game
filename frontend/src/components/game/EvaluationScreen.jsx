@@ -20,16 +20,7 @@ const EvaluationScreen = ({
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a2e] p-4 text-white overflow-hidden">
-            {/* Header Info */}
             <div className="bg-slate-900/50 p-4 mb-4 rounded-xl border border-white/5 flex items-center justify-between shrink-0 relative">
-                {/* Previous Answers Button - Centered Absolute */}
-                <button
-                    onClick={() => setShowHistory(true)}
-                    className="absolute left-1/2 -translate-x-1/2 top-0 bg-slate-800 border-x border-b border-slate-600 text-xs font-bold text-gray-300 px-4 py-2 rounded-b-xl shadow-lg hover:bg-slate-700 hover:text-white transition-all z-10 flex items-center gap-1"
-                >
-                    Respuestas Previas
-                </button>
-
                 <div>
                     <div className="text-xs text-gray-400 uppercase tracking-widest font-bold">Categoría</div>
                     <div className="text-xl font-bold text-white leading-tight">{category}</div>
@@ -43,9 +34,12 @@ const EvaluationScreen = ({
                 </div>
             </div>
 
-            <h2 className="text-center text-xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 shrink-0">
-                Respuestas
-            </h2>
+            <div className="flex items-center justify-between w-full mb-4 px-1">
+                <h2 className="text-xl font-bold text-yellow-400 shrink-0">Respuestas</h2>
+                <button onClick={() => setShowHistory(true)} className="bg-[#0077b6] border border-[#023e8a] text-xs font-bold text-white px-3 py-1.5 rounded-lg shadow-md hover:bg-[#0096c7] hover:shadow-[#0077b6]/30 transition-all active:scale-95">
+                    Respuestas previas
+                </button>
+            </div>
 
             {/* Table of Answers - Compact list */}
             <div className="overflow-y-auto mb-5 custom-scrollbar p-1 shrink-0 max-h-[60vh]">
@@ -160,7 +154,7 @@ const EvaluationScreen = ({
                 history={winnersHistory}
                 currentCategory={category}
             />
-        </div>
+        </div >
     );
 };
 
