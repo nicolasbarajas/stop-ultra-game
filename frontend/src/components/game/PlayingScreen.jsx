@@ -106,7 +106,7 @@ const PlayingScreen = ({
                 <div className="bg-gradient-to-r from-indigo-900/90 to-slate-900/90 border border-indigo-500/30 rounded-xl flex items-center p-0 shadow-lg overflow-hidden relative h-20">
                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-transparent via-indigo-500 to-transparent opacity-50"></div>
                     <div className="w-24 flex-none flex items-center justify-left pl-3 text-sm tracking-widest text-indigo-300 font-bold border-r border-indigo-500/30 h-full bg-black/10">
-                        Letra
+                        {letter && letter.length > 1 ? "Letras" : "Letra"}
                     </div>
                     <div className="flex-1 flex justify-center items-center text-5xl font-black text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)] leading-none pb-1">
                         {letter}

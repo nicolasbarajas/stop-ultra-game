@@ -25,7 +25,7 @@ const EvaluationScreen = ({
                 <div className="flex items-center gap-4">
                     {/* Letter Box */}
                     <div className="flex flex-col items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-lg shadow-lg border border-indigo-400/30 shrink-0">
-                        <span className="text-[12px] text-indigo-200 font-bold tracking-wider">Letra</span>
+                        <span className="text-[12px] text-indigo-200 font-bold tracking-wider">{letter && letter.length > 1 ? "Letras" : "Letra"}</span>
                         <span className="text-4xl font-black text-white drop-shadow-md leading-none pb-1">{letter}</span>
                     </div>
 

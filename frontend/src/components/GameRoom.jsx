@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import VirtualKeyboard from './VirtualKeyboard';
 import LobbyScreen from './LobbyScreen';
 import GameCoordinator from './GameCoordinator';
-import { getClientId, getStoredNickname } from '../utils/auth';
+import { getClientId, getStoredNickname, setStoredNickname } from '../utils/auth';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -68,15 +68,7 @@ function GameRoom() {
 
     // Initial Check and Connection
     useEffect(() => {
-        if (!roomId) return;
-
-        // If no nickname, redirect to home with room code? 
-        // Or prompt? For now, redirect to home to force name entry.
-        if (!nickname) {
-            alert("Por favor ingresa tu nombre primero");
-            navigate(`/?room=${roomId}`);
-            return;
-        }
+        if (!roomId || !nickname) return;
 
         const checkAndConnect = async () => {
             try {
@@ -225,8 +217,8 @@ function GameRoom() {
         }
     };
 
-    const startGame = (timeLimit = 60) => {
-        sendJsonMessage("START_GAME", { time_limit: timeLimit });
+    const startGame = (timeLimit = 60, gameMode = "UNIQUE_LETTERS") => {
+        sendJsonMessage("START_GAME", { time_limit: timeLimit, game_mode: gameMode });
     };
 
     const leaveRoom = () => {
@@ -237,6 +229,54 @@ function GameRoom() {
     };
 
     // Render logic based on state
+    if (!nickname) {
+        return (
+            <div className="flex flex-col items-center justify-center p-4 h-[100dvh] w-full text-center relative">
+                <div className="max-w-md w-full bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl relative overflow-hidden z-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+                    <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400 mb-4 text-center">
+                        Ingreso a la sala
+                    </h2>
+                    <p className="text-gray-300 mb-8 text-lg">
+                        No tienes un nombre registrado, ingresa uno a continuación para acceder a la sala:
+                    </p>
+
+                    <div className="space-y-4">
+                        <input
+                            type="text"
+                            id="room-nickname-input"
+                            className="w-full bg-slate-900/50 text-white font-bold p-4 rounded-xl text-center text-xl border-2 border-slate-600 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all"
+                            placeholder="Ej: Eugenia"
+                            maxLength={12}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    document.getElementById('btn-ingresar-sala').click();
+                                }
+                            }}
+                        />
+                        <button
+                            id="btn-ingresar-sala"
+                            onClick={() => {
+                                const input = document.getElementById('room-nickname-input').value.trim();
+                                if (input) {
+                                    setStoredNickname(input);
+                                    setNickname(input);
+                                } else {
+                                    alert("Por favor ingresa un nombre válido");
+                                }
+                            }}
+                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xl py-4 rounded-xl shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                            Ingresar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (gameState === null) {
         return (
             <LobbyScreen
@@ -246,6 +286,7 @@ function GameRoom() {
                 isHost={isHost}
                 onLeaveRoom={leaveRoom}
                 myClientId={clientId}
+                onKickPlayer={(targetId) => sendJsonMessage("KICK_PLAYER", { target_id: targetId })}
             />
         );
     }
@@ -253,6 +294,7 @@ function GameRoom() {
     return (
         <ErrorBoundary>
             <GameCoordinator
+                roomId={roomId}
                 gameState={gameState}
                 gameData={gameData}
                 myClientId={clientId}

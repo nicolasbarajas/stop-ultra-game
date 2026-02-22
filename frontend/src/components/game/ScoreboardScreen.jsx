@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, onEndGame, isFinal, modName, onKickPlayer, myClientId }) => {
+const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackToLobby, onEndGame, isFinal, modName, onKickPlayer, myClientId }) => {
     // Sort players by score
     const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
@@ -67,12 +67,23 @@ const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, o
                 {isFinal ? (
                     <>
                         {isHost ? (
-                            <button
-                                onClick={onBackToLobby}
-                                className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
-                            >
-                                Volver a la sala 🏠
-                            </button>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => {
+                                        const shareUrl = `${window.location.origin}/room/${roomId}`;
+                                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`, '_blank');
+                                    }}
+                                    className="w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5c] text-white font-bold text-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                                >
+                                    <span>Compartir sala por WhatsApp</span> <span className="text-2xl">💬</span>
+                                </button>
+                                <button
+                                    onClick={onBackToLobby}
+                                    className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
+                                >
+                                    Volver a la sala 🏠
+                                </button>
+                            </div>
                         ) : (
                             <div className="text-center text-gray-400 animate-pulse px-4 flex flex-col gap-1">
                                 <span>Esperando que el anfitrión <span className="text-rose-400 font-bold">{hostName}</span></span>
@@ -82,6 +93,21 @@ const ScoreboardScreen = ({ players, isMod, isHost, onContinue, onBackToLobby, o
                     </>
                 ) : (
                     <>
+                        {isHost && (
+                            <div className="flex items-center gap-3 w-full mb-2">
+                                <button
+                                    onClick={() => {
+                                        const shareUrl = `${window.location.origin}/room/${roomId}`;
+                                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`, '_blank');
+                                    }}
+                                    className="flex-1 py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5c] text-white font-bold text-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                                >
+                                    <span>Compartir sala por WhatsApp</span> <span className="text-2xl">💬</span>
+                                </button>
+                                {/* Placeholder to align with the Kick buttons above */}
+                                <div className="w-8 h-8 shrink-0 border border-transparent"></div>
+                            </div>
+                        )}
                         {isMod ? (
                             <div className="flex flex-col gap-3">
                                 <div>

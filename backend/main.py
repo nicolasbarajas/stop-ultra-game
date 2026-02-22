@@ -36,6 +36,8 @@ CATEGORIES = [
     ("Película", "En español o idioma original"), ("Serie de TV", "En español o idioma original"), ("Famoso", "Nombre o Alias"), ("Marca", "Empresa")
 ]
 
+BIGRAMS = [("DE", 1), ("LA", 1), ("QU",1), ("EN",1), ("EL",1), ("ES",1), ("SE",1), ("LO",1), ("UN",1), ("PO",1), ("PA",1), ("PR",1), ("SU",1), ("HA",1), ("NO",1), ("CA",1), ("RE",1), ("AL",1), ("SI",1), ("PE",1), ("IN",1), ("ME",1), ("MA",1), ("DI",1), ("CU",1), ("MI",1), ("SO",1), ("TE",1), ("MU",1), ("TO",1), ("LE",1), ("TR",1), ("PU",1), ("VE",1), ("TA",1), ("VI",1), ("FU",1), ("DO",1), ("AC",1), ("SA",1), ("EX",1), ("TI",2), ("AN",2), ("CI",2), ("MO",2), ("NU",2), ("OT",2), ("GR",2), ("JU",2), ("HO",2), ("NA",2), ("VA",2), ("AS",2), ("BA",2), ("FI",2), ("CR",2), ("NI",2), ("AU",3), ("AÑ",3), ("LU",3), ("HE",3), ("AP",3), ("ER",3), ("EM",3), ("OB",3), ("FA",3), ("CE",2), ("IM",3), ("AM",2), ("FO",2), ("HI",3), ("FR",3), ("LI",3), ("AR",2), ("AD",2), ("GE",3), ("DA",2), ("YA",3), ("PI",2), ("OR",2), ("PL",3), ("NE",2), ("GO",3), ("RA",2), ("DU",3), ("RO",2), ("AB",3), ("CL",2), ("AQ",3), ("VO",3), ("HU",3), ("BU",2), ("AG",3), ("FE",2), ("GU",3), ("BI",3), ("YO",3), ("GA",2), ("AH",3), ("OC",3), ("TU",2), ("JO",2), ("EJ",3), ("AY",3), ("OP",2), ("BO",2), ("RI",2), ("EC",2), ("US",2), ("AT",2), ("ED",2), ("ID",2), ("OF",2), ("AF",2), ("BR",2), ("EF",2), ("IG",3), ("CH",2), ("BE",2), ("RU",2), ("EV",3), ("JA",2), ("ET",3), ("EQ",3), ("IR",3), ("VU",3), ("AV",3), ("JE",3), ("BL",3), ("OJ",3), ("ZO",3), ("AI",3), ("OL",3), ("FL",3), ("IS",3), ("OS",3), ("UR",3), ("AZ",3), ("GI",3), ("IZ",3), ("DR",3), ("GL",3), ("KI",3), ("IL",3), ("AJ",3), ("ON",3), ("ZA",3), ("EP",3), ("UB",3), ("JI",3), ("AE",3), ("OD",3), ("OX",3), ("YU",3), ("EG",3), ("CO",1)]
+
 # --- Connection Manager (WebSockets only) ---
 class ConnectionManager:
     def __init__(self):
@@ -107,6 +109,8 @@ def get_game_state_payload(room_data: dict, force_reveal=False):
         "last_winning_word": room_data.get("last_winning_word"),
         "last_winning_time": room_data.get("last_winning_time"),
         "winners_history": room_data.get("winners_history", []),
+        "game_mode": room_data.get("game_mode", "UNIQUE_LETTERS"),
+        "current_round_type": room_data.get("current_round_type", "LETTER"),
         "server_time": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
 
@@ -145,6 +149,8 @@ async def create_room_endpoint():
         "inactive_players": {},
         "round_start_time": None,
         "time_limit": 60,
+        "game_mode": "UNIQUE_LETTERS",
+        "current_round_type": "LETTER",
         "created_at": firestore.SERVER_TIMESTAMP,
         "expire_at": get_expiration_time()
     }
@@ -299,11 +305,22 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         
             elif action == "START_GAME":
                 if len(players) >= 3:
+                     game_mode = payload.get("game_mode", "UNIQUE_LETTERS")
+                     initial_round_type = "LETTER"
+                     if game_mode == "DOUBLE_LETTERS":
+                         initial_round_type = "BIGRAM"
+                     elif game_mode == "MIXED_RANDOM":
+                         initial_round_type = random.choice(["LETTER", "BIGRAM"])
+                     elif game_mode == "MIXED_INTERLEAVED":
+                         initial_round_type = "LETTER" # Starts with LETTER
+
                      updates = {
                          "expire_at": get_expiration_time(),
                          "state": "PREPARING",
                          "moderator_id": room_data.get("host_id"), # Start with host
                          "time_limit": payload.get("time_limit", 60),
+                         "game_mode": game_mode,
+                         "current_round_type": initial_round_type,
                          "current_letter": None,
                          "current_category": None,
                          "current_category_description": None,
@@ -321,7 +338,18 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                     # but with a letter/category set.
                     # Frontend will see letter/category and play animation.
                     
-                    chosen_letter = random.choice(LETTERS)
+                    current_round_type = room_data.get("current_round_type", "LETTER")
+                    if current_round_type == "BIGRAM":
+                        # Tupla value to probability weight: 1 -> 4, 2 -> 2, 3 -> 1
+                        weights = []
+                        for bg, val in BIGRAMS:
+                            if val == 1: weights.append(4)
+                            elif val == 2: weights.append(2)
+                            else: weights.append(1)  # Assumes val == 3
+                        chosen_letter = random.choices(BIGRAMS, weights=weights, k=1)[0][0]
+                    else:
+                        chosen_letter = random.choice(LETTERS)
+
                     # Handle tuple (Name, Desc)
                     chosen_cat_tuple = random.choice(CATEGORIES)
                     if isinstance(chosen_cat_tuple, tuple):
@@ -493,9 +521,19 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
             elif action == "CONTINUE_GAME":
                 # Start new round
                 if client_id == room_data.get("moderator_id") and room_data["state"] == "SCORES":
+                    game_mode = room_data.get("game_mode", "UNIQUE_LETTERS")
+                    prev_round_type = room_data.get("current_round_type", "LETTER")
+                    next_round_type = prev_round_type
+
+                    if game_mode == "MIXED_INTERLEAVED":
+                        next_round_type = "BIGRAM" if prev_round_type == "LETTER" else "LETTER"
+                    elif game_mode == "MIXED_RANDOM":
+                        next_round_type = random.choice(["LETTER", "BIGRAM"])
+
                     updates = {
                         "expire_at": get_expiration_time(),
                         "state": "PREPARING",
+                        "current_round_type": next_round_type,
                         "current_letter": None,
                         "current_category": None,
                         "current_category_description": None,

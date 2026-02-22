@@ -7,6 +7,7 @@ import WinnerRevealScreen from './game/WinnerRevealScreen';
 
 // gameState: PREPARING | PLAYING | EVALUATING | SCORES
 const GameCoordinator = ({
+    roomId, // Added roomId to props
     gameState,
     gameData, // { letter, category, answers, moderator_id, ... }
     myClientId,
@@ -105,6 +106,7 @@ const GameCoordinator = ({
     if (gameState === 'SCORES' || gameState === 'FINAL_SCORES') {
         return (
             <ScoreboardScreen
+                roomId={roomId}
                 players={players}
                 isMod={isMod}
                 isHost={isHost}
