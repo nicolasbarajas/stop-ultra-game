@@ -1,9 +1,9 @@
 import React from 'react';
 import HelpModal from './HelpModal';
+import RoomShareHeader from './RoomShareHeader';
 
 const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClientId, onKickPlayer }) => {
     const canStart = players.length >= 3; // Rule: Must have >= 3 players
-
 
     const [selectedTime, setSelectedTime] = React.useState(30);
     const [selectedMode, setSelectedMode] = React.useState("UNIQUE_LETTERS");
@@ -28,7 +28,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
     const [showHelp, setShowHelp] = React.useState(false);
 
     return (
-        <div className="flex flex-col items-center h-full p-4 gap-6 relative">
+        <div className="flex flex-col items-center h-full p-4 gap-3 relative">
 
             {/* EXIT Button (Top Left) */}
             <button
@@ -48,28 +48,22 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                 Ayuda <span>?</span>
             </button>
 
+            <div className="text-gray-400 text-xl -mb-2">
+                Sala
+            </div>
+
             {/* Header */}
-            <div className="text-center mt-6 flex flex-col items-center">
-                <div className="text-gray-400 text-sm tracking-wider mb-1">Código de sala</div>
-                <div className="text-6xl font-black font-mono text-white bg-slate-800 px-6 py-2 rounded-xl border-2 border-dashed border-gray-600 select-all mb-4">
-                    {roomId}
-                </div>
-                {isHost && (
-                    <button
-                        onClick={() => {
-                            const shareUrl = `${window.location.origin}/room/${roomId}`;
-                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`, '_blank');
-                        }}
-                        className="bg-[#25D366] hover:bg-[#1ebd5c] text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-transform hover:scale-105 flex items-center justify-center gap-2"
-                        title="Invitar por WhatsApp"
-                    >
-                        <span>Invitar por WhatsApp</span> <span className="text-xl">💬</span>
-                    </button>
-                )}
+            <div className="relative flex items-center justify-center w-full max-w-md">
+                {/* Contenedor del ID - Centro absoluto */}
+                <RoomShareHeader
+                    roomId={roomId}
+                    className="relative text-2xl font-black font-mono text-white bg-slate-800 px-3 py-1 border-2 border-dashed border-gray-600"
+                    iconMargin={8}
+                />
             </div>
 
             {/* Players List */}
-            <div className="w-full max-w-md bg-slate-800/50 rounded-2xl p-4 overflow-hidden flex flex-col border border-slate-700 max-h-[60vh]">
+            <div className="w-full max-w-md bg-slate-800/50 rounded-2xl p-4 flex flex-col border border-slate-700">
                 <h3 className="text-gray-400 font-bold mb-3 flex justify-between">
                     <span>Jugadores</span>
                     <span className="bg-slate-700 px-2 rounded text-white">{players.length}</span>
@@ -131,7 +125,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
             {/* Footer Actions */}
             <div className="w-full max-w-md pb-4">
                 {!canStart && players.length > 0 && (
-                    <div className="text-center text-yellow-500/80 bg-yellow-900/10 py-5 rounded-lg border border-yellow-900/30 text-sm mb-6">
+                    <div className="text-center text-yellow-500/80 rounded-lg text-sm mb-6">
                         Esperando a mínimo {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
                     </div>
                 )}
@@ -139,7 +133,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                 {isHost ? (
                     <div className="space-y-3">
                         <div className="bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-2">
-                            <label className="text-gray-400 text-xs font-bold uppercase tracking-wider">Tiempo de ronda</label>
+                            <label className="text-gray-400 text-xs font-bold tracking-wider">Tiempo de ronda</label>
                             <div className="relative">
                                 <select
                                     value={selectedTime}
@@ -159,7 +153,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                         </div>
 
                         <div className="bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-2">
-                            <label className="text-gray-400 text-xs font-bold uppercase tracking-wider">Modo de juego</label>
+                            <label className="text-gray-400 text-xs font-bold tracking-wider">Modo de juego</label>
                             <div className="relative">
                                 <select
                                     value={selectedMode}
@@ -195,7 +189,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                     </div>
                 ) : (
                     canStart && (
-                        <div className="w-full py-4 rounded-xl font-bold text-lg text-center bg-slate-800 text-gray-400 border border-slate-700 animate-pulse">
+                        <div className="w-full py-2 rounded-xl font-bold text-md text-center text-gray-400 animate-pulse">
                             Esperando inicio por parte del anfitrión...
                         </div>
                     )

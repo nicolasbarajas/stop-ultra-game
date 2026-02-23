@@ -1,4 +1,5 @@
 import React from 'react';
+import RoomShareHeader from '../RoomShareHeader';
 
 const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackToLobby, onEndGame, isFinal, modName, onKickPlayer, myClientId }) => {
     // Sort players by score
@@ -9,33 +10,36 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a2e] p-6 text-white items-center overflow-y-auto">
-            <h2 className="text-3xl font-black mb-6 text-white text-center">
-                {isFinal ? "Resultados finales" : "Tabla de posiciones"}
-            </h2>
+
+            {isFinal ? (
+                <div className="text-2xl font-black text-white px-3 py-1 mb-4">Resultados finales</div>
+            ) : (
+                <RoomShareHeader
+                    roomId={roomId}
+                    title="Posiciones"
+                    className="relative text-2xl font-black text-white px-3 py-1 mb-6"
+                    iconMargin={4}
+                />
+            )}
 
             <div className="w-full max-w-md flex flex-col gap-4 mb-5">
                 {sortedPlayers.map((p, idx) => (
                     <div key={p.id} className="flex items-center gap-3 w-full">
                         <div
-                            className={`flex-1 flex items-center justify-between p-4 rounded-xl border-2 transition-all ${idx === 0
-                                ? 'bg-gradient-to-r from-green-900/20 to-black/80 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]'
-                                : 'bg-slate-800 border-slate-700'
-                                }`}
-                        >
+                            className={`flex-1 flex items-center justify-between px-4 py- transition-all`}>
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${idx === 0 ? 'bg-green-600 text-white' : 'bg-slate-600 text-gray-300'
-                                    }`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${idx === 0 ? 'bg-green-600 text-white' : 'bg-slate-600 text-gray-300'}`}>
                                     {idx + 1}
                                 </div>
                                 <div className="flex flex-col">
                                     <span className={`font-bold text-lg ${idx === 0 ? 'text-green-400' : 'text-white'}`}>
                                         {p.nickname}
                                     </span>
-                                    {idx === 0 && <span className="text-[10px] text-green-500 tracking-widest font-bold uppercase">Líder</span>}
+                                    {idx === 0 && <span className="text-[10px] text-green-500 tracking-widest font-bold">{isFinal ? "Ganador" : "Líder"}</span>}
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <span className="text-3xl font-black font-mono">{p.score}</span>
+                                <span className="text-xl font-black font-mono">{p.score}</span>
                             </div>
                         </div>
 
@@ -69,15 +73,6 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                         {isHost ? (
                             <div className="flex flex-col gap-3">
                                 <button
-                                    onClick={() => {
-                                        const shareUrl = `${window.location.origin}/room/${roomId}`;
-                                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`, '_blank');
-                                    }}
-                                    className="w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5c] text-white font-bold text-xl shadow-lg transition-all flex items-center justify-center gap-2"
-                                >
-                                    <span>Compartir sala por WhatsApp</span> <span className="text-2xl">💬</span>
-                                </button>
-                                <button
                                     onClick={onBackToLobby}
                                     className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
                                 >
@@ -85,7 +80,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                                 </button>
                             </div>
                         ) : (
-                            <div className="text-center text-gray-400 animate-pulse px-4 flex flex-col gap-1">
+                            <div className="text-center text-gray-400 animate-pulse px-4 flex flex-col">
                                 <span>Esperando que el anfitrión <span className="text-rose-400 font-bold">{hostName}</span></span>
                                 <span>finalice totalmente la partida...</span>
                             </div>
@@ -93,21 +88,6 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                     </>
                 ) : (
                     <>
-                        {isHost && (
-                            <div className="flex items-center gap-3 w-full mb-2">
-                                <button
-                                    onClick={() => {
-                                        const shareUrl = `${window.location.origin}/room/${roomId}`;
-                                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareUrl)}`, '_blank');
-                                    }}
-                                    className="flex-1 py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebd5c] text-white font-bold text-xl shadow-lg transition-all flex items-center justify-center gap-2"
-                                >
-                                    <span>Compartir sala por WhatsApp</span> <span className="text-2xl">💬</span>
-                                </button>
-                                {/* Placeholder to align with the Kick buttons above */}
-                                <div className="w-8 h-8 shrink-0 border border-transparent"></div>
-                            </div>
-                        )}
                         {isMod ? (
                             <div className="flex flex-col gap-3">
                                 <div>
@@ -120,16 +100,16 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                                 </div>
                                 <button
                                     onClick={onContinue}
-                                    className="w-full py-4 mb-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xl shadow-lg hover:scale-105 transition-transform animate-pulse-slow"
+                                    className="w-full py-2 px-4 mb-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-lg shadow-lg hover:scale-105 transition-transform animate-pulse-slow"
                                 >
-                                    Preparar Ronda
+                                    Preparar la ronda
                                 </button>
 
                                 <button
                                     onClick={() => {
                                         if (confirm("¿Estás seguro de finalizar la partida y ver los resultados finales?")) onEndGame();
                                     }}
-                                    className="w-full py-4 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
+                                    className="w-full py-2 px-4 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
                                     Finalizar Partida
                                 </button>

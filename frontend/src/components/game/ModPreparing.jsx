@@ -32,7 +32,7 @@ const ModPreparing = ({ letter, category, isMod, onSpin, modName }) => {
                     {isMod ? (
                         <button
                             onClick={handleSpin}
-                            className="bg-purple-600 hover:bg-purple-500 text-white font-black text-2xl py-6 px-12 rounded-xl shadow-[0_0_30px_rgba(147,51,234,0.5)] hover:scale-105 transition-all"
+                            className="bg-purple-600 hover:bg-purple-500 text-white font-black text-2xl py-4 px-12 rounded-xl shadow-[0_0_30px_rgba(147,51,234,0.5)] hover:scale-105 transition-all"
                         >
                             ! Gira la ruleta !
                         </button>

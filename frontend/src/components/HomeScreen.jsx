@@ -16,7 +16,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
         console.log("HomeScreen: handleCreate clicked");
         if (!nickname.trim()) {
             console.log("HomeScreen: No nickname");
-            alert("Por favor ingresa un Nickname");
+            alert("Por favor ingresa un Nombre");
             return;
         }
 
@@ -43,7 +43,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
 
     const goToJoin = () => {
         if (!nickname.trim()) {
-            alert("Por favor ingresa un Nickname");
+            alert("Por favor ingresa un Nombre");
             return;
         }
         setView('JOIN');
@@ -56,7 +56,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
             onJoinRoom(joinCode, nickname);
         } else {
             console.log("HomeScreen: No join code");
-            alert("Por favor ingresa un CÓDIGO");
+            alert("Por favor ingresa un Código");
         }
     };
 

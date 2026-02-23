@@ -48,7 +48,7 @@ const EvaluationScreen = ({
             </div>
 
             {/* Table of Answers - Compact list */}
-            <div className="overflow-y-auto mb-5 custom-scrollbar p-1 shrink-0 max-h-[60vh]">
+            <div className="overflow-y-auto mb-2 custom-scrollbar p-1 shrink-0 max-h-[60vh]">
                 <div className="flex flex-col gap-2">
                     {answers.map((entry, idx) => (
                         <div
@@ -106,7 +106,7 @@ const EvaluationScreen = ({
                                     onClick={() => {
                                         if (confirm("¿Seguro que nadie ganó? Se iniciará una nueva ronda.")) onRestartRound();
                                     }}
-                                    className="w-full py-3 mb-2 rounded-xl font-bold text-lg text-yellow-400 border-2 border-yellow-500/30 hover:bg-yellow-500/10 transition-all"
+                                    className="w-full py-2 mb-2 rounded-xl font-bold text-lg text-yellow-400 border-2 border-yellow-500/30 hover:bg-yellow-500/10 transition-all"
                                 >
                                     Nadie ganó - Repetir ronda
                                 </button>
@@ -114,7 +114,7 @@ const EvaluationScreen = ({
                                     onClick={() => {
                                         if (confirm("¿Estás seguro de finalizar la partida?")) onEndGame();
                                     }}
-                                    className="w-full py-3 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
+                                    className="w-full py-2 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
                                     Finalizar Partida
                                 </button>
@@ -140,7 +140,7 @@ const EvaluationScreen = ({
                     </>
 
                 ) : (
-                    <div className="text-center text-xs text-gray-400 animate-pulse bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                    <div className="text-center text-md text-gray-400 animate-pulse">
                         {answers.length > 0 ? (
                             <span>
                                 El moderador <span className="text-yellow-400 font-bold">{modName}</span> está eligiendo al ganador...

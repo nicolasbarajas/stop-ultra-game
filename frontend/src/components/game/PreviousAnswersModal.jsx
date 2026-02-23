@@ -40,7 +40,7 @@ const PreviousAnswersModal = ({ isOpen, onClose, history, currentCategory }) => 
                                     className="bg-slate-800/50 p-3 rounded-lg border border-slate-700 flex justify-between items-center"
                                 >
                                     <div className="flex flex-col">
-                                        <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">
+                                        <span className="text-xs text-gray-500 tracking-wider font-bold">
                                             {entry.winner}
                                         </span>
                                         <span className="text-white font-bold text-lg">

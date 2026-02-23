@@ -30,8 +30,8 @@ app.add_middleware(
 # --- Constants ---
 LETTERS = [c for c in string.ascii_uppercase if c not in ['K', 'W']]
 CATEGORIES = [
-    ("Herramienta", "Instrumento-Utensilio"), ("Animal", "Clase-Orden-Familia-Especie"), ("Cuerpo Humano", "Partes-Fluidos-Enfermedades"),
-    ("Adjetivo", "Cualidad-Defecto"), ("Ciudad", "Municipio"), ("País", "Actual Existente"),
+    ("Herramienta", "Instrumento-Utensilio-Arma"), ("Animal", "Clase-Orden-Familia-Especie"), ("Cuerpo Humano", "Partes-Fluidos-Enfermedades-Síntomas"),
+    ("Adjetivo", "Cualidad-Defecto"), ("Ciudad", "Municipio"), ("País", "Actual-Existente"),
     ("Profesión", "Ocupación-Oficio"), ("Deporte", "Disciplina Deportiva"), ("Alimento", "Comida-Bebida-Fruver"), ("Cantante", "Grupo Musical"),
     ("Película", "En español o idioma original"), ("Serie de TV", "En español o idioma original"), ("Famoso", "Nombre o Alias"), ("Marca", "Empresa")
 ]
@@ -146,6 +146,8 @@ async def create_room_endpoint():
         "current_category_description": None,
         "round_answers": [],
         "winners_history": [],
+        "used_letters": [],
+        "used_categories": [],
         "inactive_players": {},
         "round_start_time": None,
         "time_limit": 60,
@@ -325,7 +327,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          "current_category": None,
                          "current_category_description": None,
                          "round_answers": [],
-                         "winners_history": []
+                         "winners_history": [],
+                         "used_letters": [],
+                         "used_categories": []
                      }
                      doc_ref.update(updates)
                      room_data.update(updates)
@@ -348,27 +352,42 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             else: weights.append(1)  # Assumes val == 3
                         chosen_letter = random.choices(BIGRAMS, weights=weights, k=1)[0][0]
                     else:
-                        chosen_letter = random.choice(LETTERS)
+                        used_letters_db = room_data.get("used_letters", [])
+                        available_letters = [c for c in LETTERS if c not in used_letters_db]
+                        if not available_letters:
+                            available_letters = LETTERS
+                            used_letters_db = []
+                        chosen_letter = random.choice(available_letters)
+                        used_letters_db.append(chosen_letter)
 
                     # Handle tuple (Name, Desc)
-                    chosen_cat_tuple = random.choice(CATEGORIES)
+                    used_categories_db = room_data.get("used_categories", [])
+                    available_cats = [cat for cat in CATEGORIES if (cat[0] if isinstance(cat, tuple) else cat) not in used_categories_db]
+                    if not available_cats:
+                        available_cats = CATEGORIES
+                        used_categories_db = []
+                        
+                    chosen_cat_tuple = random.choice(available_cats)
                     if isinstance(chosen_cat_tuple, tuple):
                         chosen_category = chosen_cat_tuple[0]
                         chosen_category_desc = chosen_cat_tuple[1]
                     else:
                         chosen_category = chosen_cat_tuple
                         chosen_category_desc = None
+                        
+                    used_categories_db.append(chosen_category)
                     
                     updates = {
                         "expire_at": get_expiration_time(),
                         "current_letter": chosen_letter,
                         "current_category": chosen_category,
-                        "current_category_description": chosen_category_desc
+                        "current_category_description": chosen_category_desc,
+                        "used_letters": used_letters_db,
+                        "used_categories": used_categories_db
                     }
                     doc_ref.update(updates)
                     room_data.update(updates)
-                    
-                        # Broadcast the "Spin Result" (still in PREPARING)
+                    # Broadcast the "Spin Result" (still in PREPARING)
                     await manager.broadcast(room_id, {
                         "type": "GAME_STATE_UPDATE",
                         "payload": get_game_state_payload(room_data)
@@ -575,7 +594,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                          "round_answers": [],
                          "current_letter": None,
                          "current_category": None,
-                         "current_category_description": None
+                         "current_category_description": None,
+                         "used_letters": [],
+                         "used_categories": []
                      }
                      doc_ref.update(updates)
                      room_data.update(updates)

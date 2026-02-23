@@ -161,7 +161,7 @@ const PlayingScreen = ({
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="bg-black/30 px-2 py-1 rounded text-green-400 font-mono text-sm">ENVIADO</span>
+                                        <span className="bg-black/30 px-2 py-1 rounded text-green-400 font-mono text-sm">Enviado</span>
                                     </div>
                                 ))}
                                 {safeAnswers.length === 0 && (

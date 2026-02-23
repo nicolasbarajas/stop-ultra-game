@@ -34,7 +34,7 @@ const WinnerRevealScreen = ({
                         🏆
                     </motion.div>
 
-                    <h2 className="text-2xl text-yellow-100/80 font-light tracking-wide uppercase mb-2">
+                    <h2 className="text-2xl text-yellow-100/80 font-light tracking-wide mb-2">
                         Ganador de la ronda
                     </h2>
 
@@ -45,7 +45,7 @@ const WinnerRevealScreen = ({
                     <div className="relative">
                         <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full" />
                         <div className="relative bg-black/40 border border-yellow-500/30 px-8 py-4 rounded-2xl backdrop-blur-md">
-                            <span className="text-yellow-200/60 text-sm uppercase tracking-wider block mb-1">Palabra Ganadora</span>
+                            <span className="text-yellow-200/60 text-sm tracking-wider block mb-1">Palabra Ganadora</span>
                             <span className="text-2xl md:text-3xl font-bold text-white tracking-wide">
                                 "{winningWord}"
                             </span>
@@ -63,7 +63,7 @@ const WinnerRevealScreen = ({
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
-                    className="z-10 mt-12 bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl max-w-sm w-full shadow-2xl"
+                    className="z-10 mt-12 backdrop-blur-sm max-w-sm w-full shadow-2xl"
                 >
                     {isMeNextMod ? (
                         <div className="space-y-4">
