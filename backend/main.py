@@ -352,7 +352,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                             else: weights.append(1)  # Assumes val == 3
                         chosen_letter = random.choices(BIGRAMS, weights=weights, k=1)[0][0]
                     else:
-                        used_letters_db = room_data.get("used_letters", [])
+                        used_letters_db = room_data.get("used_letters", []) or []
                         available_letters = [c for c in LETTERS if c not in used_letters_db]
                         if not available_letters:
                             available_letters = LETTERS
@@ -361,7 +361,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
                         used_letters_db.append(chosen_letter)
 
                     # Handle tuple (Name, Desc)
-                    used_categories_db = room_data.get("used_categories", [])
+                    used_categories_db = room_data.get("used_categories", []) or []
                     available_cats = [cat for cat in CATEGORIES if (cat[0] if isinstance(cat, tuple) else cat) not in used_categories_db]
                     if not available_cats:
                         available_cats = CATEGORIES
