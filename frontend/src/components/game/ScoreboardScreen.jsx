@@ -81,7 +81,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                             </div>
                         ) : (
                             <div className="text-center text-gray-400 animate-pulse px-4 flex flex-col">
-                                <span>Esperando que el anfitrión <span className="text-rose-400 font-bold">{hostName}</span></span>
+                                <span>Esperando que el anfitrión <span className="text-indigo-400 font-bold">{hostName}</span></span>
                                 <span>finalice totalmente la partida...</span>
                             </div>
                         )}
@@ -111,7 +111,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                                     }}
                                     className="w-full py-2 px-4 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
-                                    Finalizar Partida
+                                    Finalizar la partida
                                 </button>
                             </div>
                         ) : (

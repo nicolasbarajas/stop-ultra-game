@@ -42,26 +42,29 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
     return (
         <div className="w-full bg-gray-900 border-t border-gray-800 flex flex-col shadow-[0_-5px_20px_rgba(0,0,0,0.5)] select-none pb-safe -mt-4 relative z-50 overscroll-none touch-none">
 
-            {/* Row 1: Delete All (Full Width) */}
-            <div className="flex w-full h-14 relative z-20 mb-3 pl-3 pr-3 pt-3">
+            <div className="flex h-12 bg-black/40 border-b border-gray-700 relative z-20 overflow-hidden mx-2">
+
+                {/* Botón de Borrar - Cuadrado perfecto a la izquierda */}
                 <button
                     onClick={handleClick(onDeleteAll)}
                     onTouchStart={handleTouch(onDeleteAll)}
-                    className="w-full h-full bg-orange-600 hover:bg-orange-700 active:scale-95 text-white font-bold text-sm tracking-wide flex items-center justify-center touch-manipulation rounded-2xl shadow-lg shadow-red-900/20 transition-all"
+                    title="Borrar toda la palabra"
+                    className="w-12 h-12 flex-shrink-0 bg-red-600/80 active:bg-red-700 active:scale-95 text-white flex items-center justify-center touch-manipulation shadow-lg shadow-red-900/20 transition-all"
                 >
-                    Borrar toda la palabra 🗑️
+                    <span className="text-xl">🗑️</span>
                 </button>
-            </div>
 
-            {/* Row 2: Input Display (Full Width) */}
-            <div className="w-full h-14 bg-black/40 flex items-center justify-center border-b border-gray-700 relative overflow-hidden px-4">
-                <span className="text-xl font-bold tracking-widest text-white uppercase truncate">
-                    {currentText.split('').map((char, index) => (
-                        <span key={index} className={char === ' ' ? 'text-gray-500 mx-0.5' : ''}>
-                            {char === ' ' ? '␣' : char}
-                        </span>
-                    ))}
-                </span>
+                {/* Display del Input - Ocupa el 100% del espacio restante */}
+                <div className="flex-1 h-full flex items-center justify-center px-4 relative overflow-hidden">
+                    <span className="text-xl font-bold tracking-widest text-white truncate">
+                        {currentText.split('').map((char, index) => (
+                            <span key={index} className={char === ' ' ? 'text-gray-500 mx-0.5' : ''}>
+                                {char === ' ' ? '␣' : char}
+                            </span>
+                        ))}
+                    </span>
+                </div>
+
             </div>
 
 
@@ -76,8 +79,8 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
                                 touch-action="none"
                                 onTouchStart={handleTouch(() => key === '⌫' ? onBackspace() : onKeyPress(key))}
                                 className={`h-12 rounded font-bold text-xl shadow-sm transition-colors flex items-center justify-center active:scale-95 touch-manipulation ${key === '⌫'
-                                    ? 'flex-[1.5] bg-red-600/80 text-white active:bg-red-700 border border-red-500/30'
-                                    : 'flex-1 max-w-[10%] bg-slate-700 text-white active:bg-slate-500'
+                                    ? 'flex-[1.5] bg-red-600/80 text-white active:bg-red-700 border border-red-500/30 my-2 ml-2 mr-0'
+                                    : 'flex-1 max-w-[10%] bg-slate-700 text-white active:bg-slate-500 mt-2'
                                     }`}
                             >
                                 {key}

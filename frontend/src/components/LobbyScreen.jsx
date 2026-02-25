@@ -177,7 +177,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                                 <button
                                     onClick={() => onStartGame(selectedTime, selectedMode)}
                                     disabled={!canStart}
-                                    className={`w-full py-4 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
+                                    className={`w-full py-3 rounded-xl font-black text-xl shadow-lg transition-all ${canStart
                                         ? 'bg-green-500 hover:bg-green-400 hover:scale-[1.02] text-white cursor-pointer'
                                         : 'bg-slate-700 text-gray-500 cursor-not-allowed grayscale'
                                         }`}

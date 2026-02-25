@@ -48,13 +48,13 @@ const EvaluationScreen = ({
             </div>
 
             {/* Table of Answers - Compact list */}
-            <div className="overflow-y-auto mb-2 custom-scrollbar p-1 shrink-0 max-h-[60vh]">
-                <div className="flex flex-col gap-2">
+            <div className="overflow-y-auto mb-2 custom-scrollbar p-1 shrink-0">
+                <div className="flex flex-col gap-1">
                     {answers.map((entry, idx) => (
                         <div
                             key={idx}
                             onClick={() => isMod && setSelectedId(entry.client_id)}
-                            className={`p-3 mb-2 rounded-lg border flex justify-between items-center transition-all ${selectedId === entry.client_id
+                            className={`p-2 mb-2 rounded-lg border flex justify-between items-center transition-all ${selectedId === entry.client_id
                                 ? 'bg-gradient-to-r from-green-900 to-slate-800 border-green-500 shadow-md'
                                 : 'bg-slate-800/60 border-slate-700'
                                 } ${isMod ? 'cursor-pointer active:scale-[0.99]' : ''}`}
@@ -71,7 +71,7 @@ const EvaluationScreen = ({
 
                             <div className="flex items-center gap-3">
                                 {entry.time_taken !== undefined && (
-                                    <span className="text-xl font-mono font-bold text-indigo-300 tracking-wider">
+                                    <span className="text-lg font-mono font-bold text-indigo-300 tracking-wider">
                                         {entry.time_taken.toFixed(3)}s
                                     </span>
                                 )}
@@ -82,7 +82,7 @@ const EvaluationScreen = ({
                         </div>
                     ))}
                     {answers.length === 0 && (
-                        <div className="text-center text-gray-500 py-4 text-sm">Nadie respondió...</div>
+                        <div className="text-center text-gray-500 py-4 text-lg font-bold">Nadie respondió...</div>
                     )}
                 </div>
             </div>
@@ -95,7 +95,7 @@ const EvaluationScreen = ({
                                 <button
                                     onClick={() => selectedId && onSelectWinner(selectedId)}
                                     disabled={!selectedId}
-                                    className={`w-full py-3 mb-3 rounded-xl font-black text-lg transition-all shadow-lg ${selectedId
+                                    className={`w-full py-2 mb-2 rounded-xl font-black text-lg transition-all shadow-lg ${selectedId
                                         ? 'bg-gradient-to-r from-green-600 to-emerald-700 text-white active:scale-[0.98]'
                                         : 'bg-slate-700 text-gray-500 cursor-not-allowed'
                                         }`}
@@ -116,7 +116,7 @@ const EvaluationScreen = ({
                                     }}
                                     className="w-full py-2 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
-                                    Finalizar Partida
+                                    Finalizar la partida
                                 </button>
                             </div>
                         ) : (
@@ -125,7 +125,7 @@ const EvaluationScreen = ({
                                     onClick={onRestartRound}
                                     className="w-full py-3 mb-2 rounded-xl font-black text-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-all shadow-lg"
                                 >
-                                    Nueva Ronda
+                                    Repetir la ronda
                                 </button>
                                 <button
                                     onClick={() => {
@@ -133,22 +133,32 @@ const EvaluationScreen = ({
                                     }}
                                     className="w-full py-3 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
-                                    Finalizar Partida
+                                    Finalizar la partida
                                 </button>
                             </div>
                         )}
                     </>
 
                 ) : (
-                    <div className="text-center text-md text-gray-400 animate-pulse">
+                    <div className="text-center text-md text-gray-400 animate-pulse px-4 flex flex-col">
                         {answers.length > 0 ? (
-                            <span>
-                                El moderador <span className="text-yellow-400 font-bold">{modName}</span> está eligiendo al ganador...
-                            </span>
+                            <>
+                                <span>
+                                    El moderador <span className="text-yellow-400 font-bold">{modName}</span>
+                                </span>
+                                <span>
+                                    está eligiendo al ganador...
+                                </span>
+                            </>
                         ) : (
-                            <span>
-                                Esperando que el moderador <span className="text-yellow-400 font-bold">{modName}</span> reinicie la ronda o finalice la partida.
-                            </span>
+                            <>
+                                <span>
+                                    Esperando que el moderador <span className="text-yellow-400 font-bold">{modName}</span>
+                                </span>
+                                <span>
+                                    reinicie la ronda o finalice la partida.
+                                </span>
+                            </>
                         )}
                     </div>
                 )}
