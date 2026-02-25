@@ -28,10 +28,10 @@ app.add_middleware(
 )
 
 # --- Constants ---
-LETTERS = [c for c in string.ascii_uppercase if c not in ['K', 'W']]
+LETTERS = [c for c in string.ascii_uppercase if c not in ['K', 'W', 'X']]
 CATEGORIES = [
-    ("Herramienta", "Instrumento-Utensilio"), ("Animal", "Clase-Orden-Familia-Especie"), ("Cuerpo Humano", "Partes-Fluidos-Enfermedades"),
-    ("Adjetivo", "Cualidad-Defecto"), ("Ciudad", "Municipio"), ("País", "Actual Existente"),
+    ("Herramienta", "Instrumento-Utensilio-Arma"), ("Animal", "Clase-Orden-Familia-Especie"), ("Cuerpo Humano", "Partes-Fluidos-Enfermedades-Síntomas"),
+    ("Adjetivo", "Cualidad-Defecto"), ("Ciudad", "Municipio"), ("País", "Existente actualmente"),
     ("Profesión", "Ocupación-Oficio"), ("Deporte", "Disciplina Deportiva"), ("Alimento", "Comida-Bebida-Fruver"), ("Cantante", "Grupo Musical"),
     ("Película", "En español o idioma original"), ("Serie de TV", "En español o idioma original"), ("Famoso", "Nombre o Alias"), ("Marca", "Empresa")
 ]
