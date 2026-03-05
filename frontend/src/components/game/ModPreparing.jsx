@@ -11,7 +11,7 @@ const ModPreparing = ({ letter, category, isMod, onSpin, modName }) => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-full p-4 bg-[#1a1a2e] text-white">
+        <div className="flex flex-col items-center justify-center fixed inset-0 w-full overflow-hidden overscroll-none p-4 bg-[#1a1a2e] text-white">
 
             {/* Header Status */}
             <div className="text-center animate-fade-in-down mb-8">

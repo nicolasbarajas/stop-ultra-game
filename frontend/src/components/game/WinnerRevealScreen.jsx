@@ -10,7 +10,7 @@ const WinnerRevealScreen = ({
     onSkip
 }) => {
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full p-6 text-center space-y-8 relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center fixed inset-0 w-full overflow-hidden overscroll-none p-6 text-center space-y-8 bg-[#1a1a2e]">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/20 to-black pointer-events-none" />
             <div className="absolute -top-20 -left-20 w-64 h-64 bg-yellow-500/10 rounded-full blur-[100px]" />

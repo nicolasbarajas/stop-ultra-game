@@ -28,7 +28,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
     const [showHelp, setShowHelp] = React.useState(false);
 
     return (
-        <div className="flex flex-col items-center h-full p-4 gap-3 relative">
+        <div className="flex flex-col items-center fixed inset-0 w-full overflow-hidden overscroll-none p-4 gap-3 bg-[#1a1a2e]">
 
             {/* EXIT Button (Top Left) */}
             <button
@@ -96,7 +96,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (!isMe && confirm(`¿Sacar a ${p.nickname} de la sala?`)) {
+                                            if (!isMe && confirm(`¿Deseas sacar a ${p.nickname} de la sala?`)) {
                                                 if (onKickPlayer) onKickPlayer(p.id);
                                             }
                                         }}
@@ -123,15 +123,10 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
             </div>
 
             {/* Footer Actions */}
-            <div className="w-full max-w-md pb-4 shrink-0 mt-2">
-                {!canStart && players.length > 0 && (
-                    <div className="text-center text-yellow-500/80 rounded-lg text-sm mb-6">
-                        Esperando a mínimo {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
-                    </div>
-                )}
-
+            {/* Footer Actions */}
+            <div className="w-full max-w-md pb-6 shrink-0 mt-2 flex flex-col gap-4">
                 {isHost ? (
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-3">
                         <div className="bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col gap-2">
                             <label className="text-gray-400 text-xs font-bold tracking-wider">Tiempo de ronda</label>
                             <div className="relative">
@@ -193,6 +188,13 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                             Esperando inicio por parte del anfitrión...
                         </div>
                     )
+                )}
+
+                {/* Mensaje de espera inferior, siempre visible cuando faltan jugadores */}
+                {!canStart && players.length > 0 && (
+                    <div className="text-center text-yellow-500/90 text-sm px-4">
+                        Esperando a mínimo <span className="font-bold">{3 - players.length}</span> {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
+                    </div>
                 )}
             </div>
 

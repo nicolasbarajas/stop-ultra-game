@@ -32,7 +32,7 @@ const HelpModal = ({ onClose }) => {
                         <div className="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center font-bold shrink-0">2</div>
                         <div>
                             <h4 className="font-bold text-pink-300">Gira y Responde</h4>
-                            <p className="text-sm text-gray-400">Un moderador gira la ruleta. Todos deben escribir algo de la <strong>Categoría</strong> que empiece con la <strong>Letra</strong> indicada.</p>
+                            <p className="text-sm text-gray-400">Un moderador gira la ruleta. Todos deben escribir algo de la <strong>Categoría</strong> que empiece con la(s) <strong>Letra(s)</strong> indicada(s).</p>
                         </div>
                     </div>
 

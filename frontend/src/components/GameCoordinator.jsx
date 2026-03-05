@@ -45,7 +45,7 @@ const GameCoordinator = ({
                 {/* Exit Button (Persistent) */}
                 <button
                     onClick={() => {
-                        if (confirm("¿Seguro que quieres salir de la sala?")) onLeaveRoom();
+                        if (confirm("¿Deseas salir de la sala?")) onLeaveRoom();
                     }}
                     className="absolute top-2 right-2 z-50 p-2 text-white/50 hover:text-white transition-colors bg-black/20 rounded-xl h-8 w-8 flex items-center justify-center font-bold"
                     title="Salir de la partida"

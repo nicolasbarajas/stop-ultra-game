@@ -19,7 +19,7 @@ const EvaluationScreen = ({
     const [showHistory, setShowHistory] = useState(false);
 
     return (
-        <div className="flex flex-col h-full bg-[#1a1a2e] p-4 text-white overflow-hidden">
+        <div className="flex flex-col fixed inset-0 w-full overflow-hidden overscroll-none bg-[#1a1a2e] p-4 text-white">
             <div className="bg-slate-900/50 p-4 mb-4 rounded-xl border border-white/5 relative shrink-0 shadow-lg">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-50 rounded-t-xl" />
                 <div className="flex items-center gap-4">

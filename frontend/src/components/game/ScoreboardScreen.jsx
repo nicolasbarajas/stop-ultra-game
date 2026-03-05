@@ -9,7 +9,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
     const hostName = hostPlayer ? hostPlayer.nickname : "el anfitrión";
 
     return (
-        <div className="flex flex-col h-full bg-[#1a1a2e] p-6 text-white items-center overflow-y-auto">
+        <div className="flex flex-col fixed inset-0 w-full overflow-hidden overscroll-none bg-[#1a1a2e] p-6 text-white items-center">
 
             {isFinal ? (
                 <div className="text-2xl font-black text-white px-3 py-1 mb-4">Resultados finales</div>
@@ -22,7 +22,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                 />
             )}
 
-            <div className="w-full max-w-md flex flex-col gap-4 mb-5">
+            <div className="w-full max-w-md flex flex-col gap-4 mb-5 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
                 {sortedPlayers.map((p, idx) => (
                     <div key={p.id} className="flex items-center gap-3 w-full">
                         <div
@@ -67,7 +67,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
             </div>
 
             {/* Actions Area - Moved immediately after list for better mobile layout */}
-            <div className="w-full max-w-md flex flex-col gap-3 pb-16">
+            <div className="w-full max-w-md flex flex-col gap-3 pb-4 shrink-0 mt-2">
                 {isFinal ? (
                     <>
                         {isHost ? (
