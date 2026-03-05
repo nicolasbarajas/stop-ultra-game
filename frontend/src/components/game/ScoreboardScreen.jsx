@@ -67,14 +67,14 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
             </div>
 
             {/* Actions Area - Moved immediately after list for better mobile layout */}
-            <div className="w-full max-w-md flex flex-col gap-3 pb-8">
+            <div className="w-full max-w-md flex flex-col gap-3 pb-16">
                 {isFinal ? (
                     <>
                         {isHost ? (
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={onBackToLobby}
-                                    className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
+                                    className="w-full py-2 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xl shadow-lg transition-all"
                                 >
                                     Volver a la sala 🏠
                                 </button>

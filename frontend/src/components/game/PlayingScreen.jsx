@@ -144,13 +144,13 @@ const PlayingScreen = ({
                 {/* Main Content Area */}
                 <div className={`flex-1 flex flex-col items-center w-full ${isMod ? 'p-4 overflow-hidden' : 'p-0 justify-end'}`}>
                     {isMod ? (
-                        <div className="w-full h-full flex flex-col items-center">
-                            <div className="text-center mb-4">
+                        <div className="w-full h-full flex flex-col items-center min-h-0">
+                            <div className="text-center mb-4 shrink-0">
                                 <h3 className="text-xl font-bold text-indigo-400 tracking-wide">Respuestas en vivo</h3>
                             </div>
 
                             {/* Real-time Answer Feed */}
-                            <div className="w-full max-w-sm flex-1 overflow-y-auto space-y-2 mb-4 custom-scrollbar">
+                            <div className="w-full max-w-sm flex-1 min-h-0 overflow-y-auto space-y-2 mb-4 custom-scrollbar">
                                 {safeAnswers.map((ans, idx) => (
                                     <div key={idx} className="px-2 rounded-lg flex justify-between items-center animate-fade-in-up">
                                         <div className="flex flex-col">
@@ -171,7 +171,7 @@ const PlayingScreen = ({
 
                             <button
                                 onClick={onForceEnd}
-                                className="mt-2 text-xs text-red-400 border border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-500/10 transition-colors"
+                                className="mt-2 text-xs text-red-400 border border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-500/10 transition-colors shrink-0 mb-4"
                             >
                                 Forzar el fin de la ronda
                             </button>

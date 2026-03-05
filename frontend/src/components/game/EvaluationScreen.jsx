@@ -48,7 +48,7 @@ const EvaluationScreen = ({
             </div>
 
             {/* Table of Answers - Compact list */}
-            <div className="overflow-y-auto mb-2 custom-scrollbar p-1 shrink-0">
+            <div className="flex-1 min-h-0 overflow-y-auto mb-2 custom-scrollbar p-1">
                 <div className="flex flex-col gap-1">
                     {answers.map((entry, idx) => (
                         <div
@@ -87,7 +87,7 @@ const EvaluationScreen = ({
                 </div>
             </div>
 
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col gap-2 w-full shrink-0 mt-2 mb-2">
                 {isMod ? (
                     <>
                         {answers.length > 0 ? (

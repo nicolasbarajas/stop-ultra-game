@@ -63,7 +63,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
             </div>
 
             {/* Players List */}
-            <div className="w-full max-w-md bg-slate-800/50 rounded-2xl p-4 flex flex-col border border-slate-700">
+            <div className="w-full max-w-md bg-slate-800/50 rounded-2xl p-4 flex flex-col border border-slate-700 flex-1 min-h-0">
                 <h3 className="text-gray-400 font-bold mb-3 flex justify-between">
                     <span>Jugadores</span>
                     <span className="bg-slate-700 px-2 rounded text-white">{players.length}</span>
@@ -123,7 +123,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
             </div>
 
             {/* Footer Actions */}
-            <div className="w-full max-w-md pb-4">
+            <div className="w-full max-w-md pb-4 shrink-0 mt-2">
                 {!canStart && players.length > 0 && (
                     <div className="text-center text-yellow-500/80 rounded-lg text-sm mb-6">
                         Esperando a mínimo {3 - players.length} {(3 - players.length) === 1 ? 'jugador' : 'jugadores'} más para iniciar...
