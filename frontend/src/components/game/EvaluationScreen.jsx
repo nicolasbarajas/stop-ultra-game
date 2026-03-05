@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PreviousAnswersModal from './PreviousAnswersModal';
+import ConfirmModal from '../ConfirmModal';
+import { useConfirm } from '../../hooks/useConfirm';
 
 const EvaluationScreen = ({
     answers,
@@ -17,6 +19,7 @@ const EvaluationScreen = ({
 }) => {
     const [selectedId, setSelectedId] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const { confirmConfig, requestConfirm, closeConfirm } = useConfirm();
 
     return (
         <div className="flex flex-col fixed inset-0 w-full overflow-hidden overscroll-none bg-[#1a1a2e] p-4 text-white">
@@ -104,7 +107,7 @@ const EvaluationScreen = ({
                                 </button>
                                 <button
                                     onClick={() => {
-                                        if (confirm("¿Seguro que nadie ganó? Se iniciará una nueva ronda.")) onRestartRound();
+                                        requestConfirm("¿Seguro que nadie ganó? Se iniciará una nueva ronda.", onRestartRound, { confirmText: "Repetir ronda", isDanger: false });
                                     }}
                                     className="w-full py-2 mb-2 rounded-xl font-bold text-lg text-yellow-400 border-2 border-yellow-500/30 hover:bg-yellow-500/10 transition-all"
                                 >
@@ -112,7 +115,7 @@ const EvaluationScreen = ({
                                 </button>
                                 <button
                                     onClick={() => {
-                                        if (confirm("¿Estás seguro de finalizar la partida?")) onEndGame();
+                                        requestConfirm("¿Estás seguro de finalizar la partida?", onEndGame, { confirmText: "Finalizar" });
                                     }}
                                     className="w-full py-2 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
@@ -129,7 +132,7 @@ const EvaluationScreen = ({
                                 </button>
                                 <button
                                     onClick={() => {
-                                        if (confirm("¿Estás seguro de finalizar la partida?")) onEndGame();
+                                        requestConfirm("¿Estás seguro de finalizar la partida?", onEndGame, { confirmText: "Finalizar" });
                                     }}
                                     className="w-full py-3 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
@@ -170,6 +173,8 @@ const EvaluationScreen = ({
                 history={winnersHistory}
                 currentCategory={category}
             />
+
+            <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
         </div >
     );
 };

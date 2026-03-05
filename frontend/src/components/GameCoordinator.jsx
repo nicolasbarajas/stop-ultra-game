@@ -4,6 +4,8 @@ import PlayingScreen from './game/PlayingScreen';
 import EvaluationScreen from './game/EvaluationScreen';
 import ScoreboardScreen from './game/ScoreboardScreen';
 import WinnerRevealScreen from './game/WinnerRevealScreen';
+import ConfirmModal from './ConfirmModal';
+import { useConfirm } from '../hooks/useConfirm';
 
 // gameState: PREPARING | PLAYING | EVALUATING | SCORES
 const GameCoordinator = ({
@@ -26,6 +28,8 @@ const GameCoordinator = ({
     const modPlayer = players.find(p => p.id === gameData.moderator_id);
     const modName = modPlayer ? modPlayer.nickname : "Moderador";
 
+    const { confirmConfig, requestConfirm, closeConfirm } = useConfirm();
+
     if (gameState === 'PREPARING') {
         return (
             <ModPreparing
@@ -45,7 +49,7 @@ const GameCoordinator = ({
                 {/* Exit Button (Persistent) */}
                 <button
                     onClick={() => {
-                        if (confirm("¿Deseas salir de la sala?")) onLeaveRoom();
+                        requestConfirm("¿Deseas salir de la sala?", onLeaveRoom, { confirmText: "Salir", isDanger: true });
                     }}
                     className="absolute top-2 right-2 z-50 p-2 text-white/50 hover:text-white transition-colors bg-black/20 rounded-xl h-8 w-8 flex items-center justify-center font-bold"
                     title="Salir de la partida"
@@ -67,6 +71,8 @@ const GameCoordinator = ({
                     startTime={gameData.round_start_time}
                     serverOffset={serverOffset}
                 />
+
+                <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
             </div>
         );
     }

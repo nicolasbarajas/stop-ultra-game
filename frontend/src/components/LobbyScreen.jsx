@@ -1,6 +1,8 @@
 import React from 'react';
 import HelpModal from './HelpModal';
 import RoomShareHeader from './RoomShareHeader';
+import ConfirmModal from './ConfirmModal';
+import { useConfirm } from '../hooks/useConfirm';
 
 const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClientId, onKickPlayer }) => {
     const canStart = players.length >= 3; // Rule: Must have >= 3 players
@@ -26,6 +28,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
     ];
 
     const [showHelp, setShowHelp] = React.useState(false);
+    const { confirmConfig, requestConfirm, closeConfirm } = useConfirm();
 
     return (
         <div className="flex flex-col items-center fixed inset-0 w-full overflow-hidden overscroll-none p-4 gap-3 bg-[#1a1a2e]">
@@ -96,8 +99,10 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (!isMe && confirm(`¿Deseas sacar a ${p.nickname} de la sala?`)) {
-                                                if (onKickPlayer) onKickPlayer(p.id);
+                                            if (!isMe) {
+                                                requestConfirm(`¿Deseas sacar a ${p.nickname} de la sala?`, () => {
+                                                    if (onKickPlayer) onKickPlayer(p.id);
+                                                }, { confirmText: "Sacar" });
                                             }
                                         }}
                                         disabled={isMe}
@@ -202,6 +207,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
 
 
             {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+            <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
         </div>
     );
 };

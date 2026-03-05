@@ -1,5 +1,7 @@
 import React from 'react';
 import RoomShareHeader from '../RoomShareHeader';
+import ConfirmModal from '../ConfirmModal';
+import { useConfirm } from '../../hooks/useConfirm';
 
 const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackToLobby, onEndGame, isFinal, modName, onKickPlayer, myClientId }) => {
     // Sort players by score
@@ -7,6 +9,8 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
 
     const hostPlayer = players.find(p => p.is_host);
     const hostName = hostPlayer ? hostPlayer.nickname : "el anfitrión";
+
+    const { confirmConfig, requestConfirm, closeConfirm } = useConfirm();
 
     return (
         <div className="flex flex-col fixed inset-0 w-full overflow-hidden overscroll-none bg-[#1a1a2e] p-6 text-white items-center">
@@ -48,8 +52,10 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (p.id !== myClientId && confirm(`¿Sacar a ${p.nickname} de la partida?`)) {
-                                        if (onKickPlayer) onKickPlayer(p.id);
+                                    if (p.id !== myClientId) {
+                                        requestConfirm(`¿Deseas sacar a ${p.nickname} de la partida?`, () => {
+                                            if (onKickPlayer) onKickPlayer(p.id);
+                                        }, { confirmText: "Sacar" });
                                     }
                                 }}
                                 disabled={p.id === myClientId}
@@ -107,7 +113,7 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
 
                                 <button
                                     onClick={() => {
-                                        if (confirm("¿Estás seguro de finalizar la partida y ver los resultados finales?")) onEndGame();
+                                        requestConfirm("¿Estás seguro de finalizar la partida y ver los resultados finales?", onEndGame, { confirmText: "Finalizar" });
                                     }}
                                     className="w-full py-2 px-4 text-red-400 text-lg font-bold border-2 border-red-500/30 rounded-xl hover:bg-red-900/20 transition-all"
                                 >
@@ -123,6 +129,8 @@ const ScoreboardScreen = ({ roomId, players, isMod, isHost, onContinue, onBackTo
                     </>
                 )}
             </div>
+
+            <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
         </div>
     );
 };
