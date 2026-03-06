@@ -55,14 +55,22 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
                 </button>
 
                 {/* Display del Input - Ocupa el 100% del espacio restante */}
-                <div className="flex-1 h-full flex items-center justify-center px-4 relative overflow-hidden">
-                    <span className="text-xl font-bold tracking-widest text-white truncate">
-                        {currentText.split('').map((char, index) => (
-                            <span key={index} className={char === ' ' ? 'text-gray-500 mx-0.5' : ''}>
-                                {char === ' ' ? '␣' : char}
-                            </span>
-                        ))}
-                    </span>
+                <div className="flex-1 h-full flex items-center justify-center px-4 overflow-hidden relative">
+                    <div
+                        className="w-full text-center whitespace-nowrap overflow-x-auto hide-scrollbar"
+                        style={{
+                            fontSize: `${Math.min(1.5, 20 / Math.max(13, currentText.length))}rem`,
+                            transition: 'font-size 0.2s ease-in-out'
+                        }}
+                    >
+                        <span className="font-bold tracking-widest text-white">
+                            {currentText.split('').map((char, index) => (
+                                <span key={index} className={char === ' ' ? 'text-gray-500 mx-[0.2em]' : ''}>
+                                    {char === ' ' ? '␣' : char}
+                                </span>
+                            ))}
+                        </span>
+                    </div>
                 </div>
 
             </div>

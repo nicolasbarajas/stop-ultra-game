@@ -61,7 +61,7 @@ const PlayingScreen = ({
     // Keyboard handlers
     const handleKeyPress = (key) => {
         if (submitted) return;
-        setWord(prev => (prev + key).slice(0, 25));
+        setWord(prev => prev + key);
     };
 
     const handleBackspace = () => {
