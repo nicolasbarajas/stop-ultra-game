@@ -50,7 +50,7 @@ const HelpModal = ({ onClose }) => {
                         <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center font-bold shrink-0">4</div>
                         <div>
                             <h4 className="font-bold text-orange-300">Penalizaciones</h4>
-                            <p className="text-sm text-gray-400">Si respondiste rápido pero te equivocaste (alguien más gana), <strong>pierdes 1 punto</strong>. Si varios responden y <strong>nadie gana</strong>, todos los que respondieron pierden 1 punto.</p>
+                            <p className="text-sm text-gray-400">Respondiste antes que otros pero una palabra inválida y alguno de ellos gana, <strong>pierdes 1 punto</strong>. Si varios responden y <strong>nadie gana</strong>, ellos pierden 1 punto.</p>
                         </div>
                     </div>
 
@@ -59,7 +59,7 @@ const HelpModal = ({ onClose }) => {
                 <div className="mt-8">
                     <button
                         onClick={onClose}
-                        className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-all"
+                        className="w-full py-3 rounded-xl font-black text-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-900/30 hover:from-purple-500 hover:to-pink-500 active:scale-[0.98] transition-all"
                     >
                         ¡Entendido!
                     </button>
