@@ -107,7 +107,7 @@ const EvaluationScreen = ({
                                 </button>
                                 <button
                                     onClick={() => {
-                                        requestConfirm("¿Seguro que nadie ganó? Se iniciará una nueva ronda.", onRestartRound, { confirmText: "Repetir ronda", isDanger: false });
+                                        requestConfirm("¿Seguro que nadie ganó?", onRestartRound, { confirmText: "Repetir ronda", isDanger: false });
                                     }}
                                     className="w-full py-2 mb-2 rounded-xl font-bold text-lg text-yellow-400 border-2 border-yellow-500/30 hover:bg-yellow-500/10 transition-all"
                                 >

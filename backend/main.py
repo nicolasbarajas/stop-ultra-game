@@ -545,17 +545,26 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, client_id: str)
 
             elif action == "RESTART_ROUND":
                  if client_id == room_data.get("moderator_id") and room_data["state"] == "EVALUATING":
+                    # Penalize all players who answered since nobody won
+                    round_answers = room_data.get("round_answers", [])
+                    for ans in round_answers:
+                        p_id = ans.get("client_id")
+                        if p_id in players:
+                            players[p_id]["score"] -= 1
+
                     updates = {
                         "expire_at": get_expiration_time(),
                         "state": "PREPARING",
                         "current_letter": None,
                         "current_category": None,
                         "current_category_description": None,
-                        "round_answers": []
+                        "round_answers": [],
+                        "players": players
                     }
                     doc_ref.update(updates)
                     room_data.update(updates)
                     should_broadcast_game_state = True
+                    should_broadcast_player_list = True
             
             elif action == "END_GAME":
                 if room_data.get("moderator_id") == client_id:

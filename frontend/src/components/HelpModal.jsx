@@ -45,6 +45,15 @@ const HelpModal = ({ onClose }) => {
                         </div>
                     </div>
 
+                    {/* Step 4 */}
+                    <div className="flex gap-4 items-start">
+                        <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center font-bold shrink-0">4</div>
+                        <div>
+                            <h4 className="font-bold text-orange-300">Penalizaciones</h4>
+                            <p className="text-sm text-gray-400">Si respondiste rápido pero te equivocaste (alguien más gana), <strong>pierdes 1 punto</strong>. Si varios responden y <strong>nadie gana</strong>, todos los que respondieron pierden 1 punto.</p>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div className="mt-8">
