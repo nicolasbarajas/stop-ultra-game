@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import HelpModal from './HelpModal';
+import ConfirmModal from './ConfirmModal';
+import { useConfirm } from '../hooks/useConfirm';
 import { getStoredNickname } from '../utils/auth';
+import { ERROR_MESSAGES } from '../utils/constants';
 
 const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
     const [view, setView] = useState('MENU'); // 'MENU' | 'JOIN'
@@ -12,11 +15,13 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [showWakeUpMessage, setShowWakeUpMessage] = useState(false);
 
+    const { confirmConfig, requestAlert, closeConfirm } = useConfirm();
+
     const handleCreate = async () => {
         console.log("HomeScreen: handleCreate clicked");
         if (!nickname.trim()) {
             console.log("HomeScreen: No nickname");
-            alert("Por favor ingresa un Nombre");
+            requestAlert(ERROR_MESSAGES.INVALID_NAME);
             return;
         }
 
@@ -34,6 +39,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
             await onCreateRoom(nickname);
         } catch (error) {
             console.error(error);
+            requestAlert(error.message || "Error conectando al servidor. Inténtalo de nuevo.", { isDanger: true });
         } finally {
             clearTimeout(timerId);
             setIsCreating(false);
@@ -43,7 +49,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
 
     const goToJoin = () => {
         if (!nickname.trim()) {
-            alert("Por favor ingresa un Nombre");
+            requestAlert(ERROR_MESSAGES.INVALID_NAME);
             return;
         }
         setView('JOIN');
@@ -53,10 +59,12 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
         console.log("HomeScreen: handleJoin clicked");
         if (joinCode.length > 0) {
             console.log("HomeScreen: Calling onJoinRoom with", joinCode, nickname);
-            onJoinRoom(joinCode, nickname);
+            onJoinRoom(joinCode, nickname).catch(err => {
+                requestAlert(err.message || "No se pudo conectar a la sala.", { isDanger: true });
+            });
         } else {
             console.log("HomeScreen: No join code");
-            alert("Por favor ingresa un Código");
+            requestAlert(ERROR_MESSAGES.INVALID_CODE);
         }
     };
 
@@ -166,6 +174,7 @@ const HomeScreen = ({ onCreateRoom, onJoinRoom }) => {
 
             </div>
             {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+            <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
         </div>
     );
 };

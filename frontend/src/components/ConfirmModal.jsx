@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ConfirmModal = ({ isOpen, onClose, onConfirm, message, cancelText = "Cancelar", confirmText = "Confirmar", isDanger = true }) => {
+const ConfirmModal = ({ isOpen, onClose, onConfirm, message, cancelText = "Cancelar", confirmText = "Confirmar", isDanger = true, isAlert = false }) => {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -19,23 +19,25 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, message, cancelText = "Cance
                         </div>
 
                         <div className="flex gap-3">
-                            <button
-                                onClick={onClose}
-                                className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-300 bg-slate-700 hover:bg-slate-600 transition-colors"
-                            >
-                                {cancelText}
-                            </button>
+                            {!isAlert && (
+                                <button
+                                    onClick={onClose}
+                                    className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-300 bg-slate-700 hover:bg-slate-600 transition-colors"
+                                >
+                                    {cancelText}
+                                </button>
+                            )}
                             <button
                                 onClick={() => {
                                     onConfirm();
                                     onClose();
                                 }}
                                 className={`flex-1 py-3 px-4 rounded-xl font-bold text-white transition-colors shadow-lg ${isDanger
-                                        ? 'bg-red-500/80 hover:bg-red-500 shadow-red-500/20'
-                                        : 'bg-indigo-500/80 hover:bg-indigo-500 shadow-indigo-500/20'
+                                    ? 'bg-red-500/80 hover:bg-red-500 shadow-red-500/20'
+                                    : 'bg-indigo-500/80 hover:bg-indigo-500 shadow-indigo-500/20'
                                     }`}
                             >
-                                {confirmText}
+                                {isAlert ? "Entendido" : confirmText}
                             </button>
                         </div>
                     </motion.div>

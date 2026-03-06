@@ -6,7 +6,8 @@ export const useConfirm = () => {
         message: '',
         onConfirm: () => { },
         confirmText: 'Confirmar',
-        isDanger: true
+        isDanger: true,
+        isAlert: false
     });
 
     const requestConfirm = (message, onConfirm, options = {}) => {
@@ -15,7 +16,19 @@ export const useConfirm = () => {
             message,
             onConfirm,
             confirmText: options.confirmText || 'Confirmar',
-            isDanger: options.isDanger !== undefined ? options.isDanger : true
+            isDanger: options.isDanger !== undefined ? options.isDanger : true,
+            isAlert: false
+        });
+    };
+
+    const requestAlert = (message, options = {}) => {
+        setConfirmConfig({
+            isOpen: true,
+            message,
+            onConfirm: () => { }, // No-op
+            confirmText: "Entendido",
+            isDanger: options.isDanger !== undefined ? options.isDanger : false,
+            isAlert: true
         });
     };
 
@@ -23,5 +36,5 @@ export const useConfirm = () => {
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
     };
 
-    return { confirmConfig, requestConfirm, closeConfirm };
+    return { confirmConfig, requestConfirm, requestAlert, closeConfirm };
 };

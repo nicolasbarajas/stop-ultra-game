@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import VirtualKeyboard from '../VirtualKeyboard';
+import ConfirmModal from '../ConfirmModal';
 
 const PlayingScreen = ({
     isMod,
@@ -17,6 +18,7 @@ const PlayingScreen = ({
     const [timeLeft, setTimeLeft] = useState(typeof initialTime === 'number' ? initialTime : 60);
     const [word, setWord] = useState("");
     const [submitted, setSubmitted] = useState(false);
+    const [showForceEndModal, setShowForceEndModal] = useState(false);
     const safeAnswers = Array.isArray(answers) ? answers : [];
 
     // Timer Logic
@@ -85,6 +87,11 @@ const PlayingScreen = ({
             onSubmitWord(word, timeTaken);
             setSubmitted(true);
         }
+    };
+
+    const confirmForceEnd = () => {
+        setShowForceEndModal(false);
+        onForceEnd();
     };
 
     // Game HUD Component (Timer + Info Cards)
@@ -170,7 +177,7 @@ const PlayingScreen = ({
                             </div>
 
                             <button
-                                onClick={onForceEnd}
+                                onClick={() => setShowForceEndModal(true)}
                                 className="mt-2 text-xs text-red-400 border border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-500/10 transition-colors shrink-0 mb-4"
                             >
                                 Forzar el fin de la ronda
@@ -207,6 +214,15 @@ const PlayingScreen = ({
                         )}
                     </div>
                 )}
+
+                <ConfirmModal
+                    isOpen={showForceEndModal}
+                    message="¿Estás seguro que deseas terminar esta ronda para todos los jugadores de inmediato?"
+                    confirmText="Sí, terminar"
+                    cancelText="Cancelar"
+                    onConfirm={confirmForceEnd}
+                    onClose={() => setShowForceEndModal(false)}
+                />
             </div>
         </div>
     );

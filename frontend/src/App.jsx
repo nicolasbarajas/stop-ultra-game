@@ -19,7 +19,7 @@ function App() {
             navigate(`/room/${data.room_id}`);
         } catch (e) {
             console.error("Error creating room:", e);
-            alert("Error creando sala");
+            throw new Error("Error creando sala");
         }
     };
 
@@ -36,14 +36,14 @@ function App() {
             });
             if (!res.ok) {
                 const err = await res.json();
-                alert(err.detail);
-                return;
+                throw new Error(err.detail);
             }
             setStoredNickname(nick);
             navigate(`/room/${code}`);
         } catch (e) {
             console.error("Error joining room:", e);
-            alert("Error conectando al servidor");
+            if (e.message !== "Failed to fetch") throw e; // Pass through backend error details
+            throw new Error("Error conectando al servidor");
         }
     };
 

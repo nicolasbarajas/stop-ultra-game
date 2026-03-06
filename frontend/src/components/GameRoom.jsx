@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import VirtualKeyboard from './VirtualKeyboard';
 import LobbyScreen from './LobbyScreen';
 import GameCoordinator from './GameCoordinator';
+import ConfirmModal from './ConfirmModal';
+import { useConfirm } from '../hooks/useConfirm';
 import { getClientId, getStoredNickname, setStoredNickname } from '../utils/auth';
+import { ERROR_MESSAGES } from '../utils/constants';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -57,6 +60,8 @@ function GameRoom() {
     const intentionalDisconnect = useRef(false);
     const isProd = import.meta.env.PROD;
 
+    const { confirmConfig, requestAlert, closeConfirm } = useConfirm();
+
     // Helper to get backend URL (needs to be consistent)
     const BACKEND_URL = isProd
         ? "https://stop-ultra-backend.onrender.com"
@@ -84,8 +89,22 @@ function GameRoom() {
 
                 if (!res.ok) {
                     const err = await res.json();
-                    alert(err.detail);
-                    navigate("/");
+                    requestAlert(err.detail || "Error al verificar la sala", {
+                        isDanger: true,
+                        confirmText: "Volver",
+                    });
+
+                    // We need to wait for the user to click "Ok" before navigating away,
+                    // but navigate right away is also acceptable if we want.
+                    // Let's modify the onConfirm callback in requestAlert for this specific case
+                    setConfirmConfig({
+                        isOpen: true,
+                        message: err.detail || "Error al verificar la sala",
+                        onConfirm: () => navigate("/"),
+                        confirmText: "Volver",
+                        isDanger: true,
+                        isAlert: true
+                    });
                     return;
                 }
 
@@ -95,8 +114,14 @@ function GameRoom() {
                 connectWebSocket(roomId, nickname);
             } catch (e) {
                 console.error("Error connecting:", e);
-                alert("Error de conexión");
-                navigate("/");
+                setConfirmConfig({
+                    isOpen: true,
+                    message: "Error de conexión al servidor.",
+                    onConfirm: () => navigate("/"),
+                    confirmText: "Volver",
+                    isDanger: true,
+                    isAlert: true
+                });
             }
         };
 
@@ -260,11 +285,16 @@ function GameRoom() {
                             id="btn-ingresar-sala"
                             onClick={() => {
                                 const input = document.getElementById('room-nickname-input').value.trim();
+                                console.log("input", input);
                                 if (input) {
+                                    console.log("inputing", input);
+
                                     setStoredNickname(input);
                                     setNickname(input);
                                 } else {
-                                    alert("Por favor ingresa un nombre válido");
+                                    console.log("input", input);
+
+                                    requestAlert(ERROR_MESSAGES.INVALID_NAME);
                                 }
                             }}
                             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xl py-4 rounded-xl shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
@@ -273,6 +303,8 @@ function GameRoom() {
                         </button>
                     </div>
                 </div>
+                {/* Agregado aquí para que funcione la alerta cuando no hay nombre */}
+                <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
             </div>
         );
     }
@@ -304,6 +336,7 @@ function GameRoom() {
                 onLeaveRoom={leaveRoom}
                 serverOffset={serverOffset.current}
             />
+            <ConfirmModal {...confirmConfig} onClose={closeConfirm} />
         </ErrorBoundary>
     );
 }
