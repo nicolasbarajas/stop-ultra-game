@@ -12,6 +12,7 @@ const LobbyScreen = ({ roomId, players, onStartGame, isHost, onLeaveRoom, myClie
 
     const timeOptions = [
         { label: "15 Segundos", value: 15 },
+        { label: "20 Segundos", value: 20 },
         { label: "30 Segundos", value: 30 },
         { label: "45 Segundos", value: 45 },
         { label: "60 Segundos", value: 60 },

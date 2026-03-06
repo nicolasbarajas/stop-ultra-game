@@ -42,6 +42,17 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
     return (
         <div className="w-full bg-gray-900 border-t border-gray-800 flex flex-col shadow-[0_-5px_20px_rgba(0,0,0,0.5)] select-none pb-safe -mt-4 relative z-50 overscroll-none touch-none">
 
+            {/* Botón de Enviar - Arriba del todo, ancho completo */}
+            <div className="flex px-2 pt-2">
+                <button
+                    onClick={handleClick(() => onSend())}
+                    onTouchStart={handleTouch(() => onSend())}
+                    className="w-full h-12 rounded-t-md bg-gradient-to-r from-green-600 to-emerald-600 text-white font-black text-lg active:scale-[0.98] shadow-lg shadow-emerald-900/20 flex items-center justify-center touch-manipulation transition-transform"
+                >
+                    Enviar palabra
+                </button>
+            </div>
+
             <div className="flex h-12 bg-black/40 border-b border-gray-700 relative z-20 overflow-hidden mx-2">
 
                 {/* Botón de Borrar - Cuadrado perfecto a la izquierda */}
@@ -55,20 +66,20 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
                 </button>
 
                 {/* Display del Input - Ocupa el 100% del espacio restante */}
-                <div className="flex-1 h-full flex items-center justify-center px-4 overflow-hidden relative">
+                <div className="flex-1 h-full flex items-center justify-center pl-4 pr-1 overflow-hidden relative">
                     <div
-                        className="w-full text-center whitespace-nowrap overflow-x-auto hide-scrollbar"
+                        className="w-full text-center whitespace-nowrap overflow-x-auto hide-scrollbar flex items-center justify-center min-w-0"
                         style={{
                             fontSize: `${Math.min(1.5, 20 / Math.max(13, currentText.length))}rem`,
                             transition: 'font-size 0.2s ease-in-out'
                         }}
                     >
                         <span className="font-bold tracking-widest text-white">
-                            {currentText.split('').map((char, index) => (
+                            {currentText ? currentText.split('').map((char, index) => (
                                 <span key={index} className={char === ' ' ? 'text-gray-500 mx-[0.2em]' : ''}>
                                     {char === ' ' ? '␣' : char}
                                 </span>
-                            ))}
+                            )) : <span className="opacity-0">_</span>}
                         </span>
                     </div>
                 </div>
@@ -77,7 +88,7 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
 
 
             {/* Keys */}
-            <div className="flex flex-col p-1 gap-1 mt-1">
+            <div className="flex flex-col p-1 gap-1">
                 {rows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex flex-1 gap-1 justify-center">
                         {row.map((key) => (
@@ -97,21 +108,14 @@ const VirtualKeyboard = ({ onKeyPress, onSend, onDeleteAll, onBackspace, current
                     </div>
                 ))}
 
-                {/* Action Row: Space & Send (Equal Width) */}
-                <div className="flex gap-2 justify-center mt-1">
+                {/* Action Row: Full width Space */}
+                <div className="flex gap-2 justify-center">
                     <button
                         onClick={handleClick(() => onKeyPress(' '))}
                         onTouchStart={handleTouch(() => onKeyPress(' '))}
                         className="flex-1 h-12 rounded bg-slate-700 text-white font-bold text-lg active:bg-slate-600 shadow-sm flex items-center justify-center touch-manipulation"
                     >
                         Espacio
-                    </button>
-                    <button
-                        onClick={handleClick(() => onSend())}
-                        onTouchStart={handleTouch(() => onSend())}
-                        className="flex-1 h-12 rounded bg-gradient-to-r from-green-600 to-emerald-600 text-white font-black text-xl active:scale-[0.98] shadow-lg flex items-center justify-center touch-manipulation"
-                    >
-                        Enviar
                     </button>
                 </div>
             </div>
